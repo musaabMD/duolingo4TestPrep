@@ -26,9 +26,14 @@ function starterMessages(question: PracticeQuestion): ChatMessage[] {
       text: "Alright, let's get started.",
     },
     {
+      id: `${question.id}-topic`,
+      role: "tutor",
+      text: `This is a ${question.topic} question.`,
+    },
+    {
       id: `${question.id}-prompt`,
       role: "tutor",
-      text: `This is a ${question.topic} MCQ. Read carefully, then choose the best answer.`,
+      text: "Read the choices carefully, then pick the best answer.",
     },
   ];
 }
@@ -40,17 +45,17 @@ function tutorReply(
 ): string {
   const q = input.toLowerCase();
   if (q.includes("hint") || q.includes("help") || q.includes("stuck")) {
-    return `Hint for ${question.topic}: eliminate choices that don't answer the prompt directly. Focus on what the question is really asking.`;
+    return `Hint for ${question.topic}: eliminate choices that don't answer the prompt directly.`;
   }
   if (q.includes("why") || q.includes("explain") || q.includes("answer")) {
     return checked
       ? question.explanation
-      : "Pick an answer and tap Check — then I can walk through the explanation.";
+      : "Pick an answer and tap Check — then I can explain.";
   }
   if (q.includes("eliminate") || q.includes("wrong")) {
-    return "Cross out options that are off-topic or only partially true. On test day, process of elimination is your friend.";
+    return "Cross out options that are off-topic or only partially true.";
   }
-  return `I'm your DrKard tutor for this ${question.topic} question. Ask for a hint, why an answer works, or how to eliminate choices.`;
+  return `Ask for a hint, why an answer works, or how to eliminate choices.`;
 }
 
 function SideChatPanel({
@@ -75,7 +80,6 @@ function SideChatPanel({
     const text = isCorrect
       ? `Correct! ${question.explanation}`
       : `Not quite. ${question.explanation}`;
-    // Queue after paint to avoid cascading render lint in the same tick as check
     const id = window.setTimeout(() => {
       setMessages((prev) => [
         ...prev,
@@ -108,61 +112,63 @@ function SideChatPanel({
     setDraft("");
   }
 
+  const lastIndex = messages.length - 1;
+
   return (
     <aside
-      className={`flex h-full min-h-0 w-full flex-col border-[var(--line)] bg-white ${className}`}
+      className={`relative flex h-full min-h-0 w-full flex-col bg-[#f7f7f7] ${className}`}
     >
-      <div className="flex items-center justify-between border-b border-[var(--line)] px-4 py-3">
-        <div className="flex items-center gap-2">
-          <span className="grid h-8 w-8 place-items-center rounded-xl bg-[var(--brand)] text-xs font-black text-white">
-            Dk
-          </span>
-          <div>
-            <p className="text-sm font-extrabold text-[var(--ink)]">Tutor chat</p>
-            <p className="text-xs font-semibold text-[var(--muted)]">
-              Ask for hints anytime
-            </p>
-          </div>
-        </div>
-        {onClose && (
+      {/* Drag/resize handle cue */}
+      <span
+        aria-hidden
+        className="absolute top-1/2 right-0 z-10 hidden h-12 w-1.5 -translate-y-1/2 translate-x-1/2 rounded-full bg-[#d4d4d4] lg:block"
+      />
+
+      {/* Top tools — Duolingo-style stacked icons */}
+      <div className="flex items-start justify-between px-3 pt-3">
+        <div className="flex flex-col gap-1">
+          {onClose ? (
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close chat"
+              className="grid h-9 w-9 place-items-center rounded-xl text-[#afafaf] transition hover:bg-white"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.4">
+                <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
+              </svg>
+            </button>
+          ) : (
+            <span className="h-2" />
+          )}
           <button
             type="button"
-            onClick={onClose}
-            aria-label="Close chat"
-            className="grid h-9 w-9 place-items-center rounded-xl text-[var(--muted)] hover:bg-[var(--surface)] lg:hidden"
+            aria-label="Flag question"
+            className="grid h-9 w-9 place-items-center rounded-full text-[#afafaf] transition hover:bg-white"
           >
-            ✕
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M5 21V4h10l-1.5 4L19 12H5" strokeLinejoin="round" />
+            </svg>
           </button>
-        )}
-      </div>
+          <button
+            type="button"
+            aria-label="Read aloud"
+            className="grid h-9 w-9 place-items-center rounded-full text-[#afafaf] transition hover:bg-white"
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M11 5L6 9H3v6h3l5 4V5z" strokeLinejoin="round" />
+              <path d="M15.5 8.5a4 4 0 010 7" strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
 
-      <div className="flex flex-wrap items-center gap-2 border-b border-[var(--line)] px-4 py-2">
-        <button
-          type="button"
-          aria-label="Flag question"
-          className="grid h-9 w-9 place-items-center rounded-full text-[#afafaf] hover:bg-[var(--surface)]"
-        >
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M5 21V4h10l-1.5 4L19 12H5" strokeLinejoin="round" />
-          </svg>
-        </button>
-        <button
-          type="button"
-          aria-label="Read aloud"
-          className="grid h-9 w-9 place-items-center rounded-full text-[#afafaf] hover:bg-[var(--surface)]"
-        >
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M11 5L6 9H3v6h3l5 4V5z" strokeLinejoin="round" />
-            <path d="M15.5 8.5a4 4 0 010 7" strokeLinecap="round" />
-          </svg>
-        </button>
-        <div className="ml-auto flex flex-wrap gap-2">
+        <div className="flex flex-wrap justify-end gap-1.5 pt-1">
           {["Hint", "Why?", "Eliminate"].map((label) => (
             <button
               key={label}
               type="button"
               onClick={() => pushExchange(label)}
-              className="rounded-full border border-[var(--line)] px-3 py-1 text-xs font-extrabold text-[var(--muted)] hover:bg-[var(--surface)]"
+              className="rounded-full bg-white px-2.5 py-1 text-[11px] font-extrabold text-[#777] shadow-[0_1px_0_#e5e5e5] transition hover:text-[var(--ink)]"
             >
               {label}
             </button>
@@ -170,49 +176,77 @@ function SideChatPanel({
         </div>
       </div>
 
-      <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
-          >
+      {/* Messages — older faded, latest clear */}
+      <div className="flex flex-1 flex-col gap-2.5 overflow-y-auto px-4 py-4">
+        {messages.map((message, i) => {
+          const isLatest = i === lastIndex;
+          const isUser = message.role === "user";
+          return (
             <div
-              className={`max-w-[92%] rounded-2xl px-3.5 py-2.5 text-sm font-semibold leading-relaxed ${
-                message.role === "user"
-                  ? "bg-[var(--sky)] text-white"
-                  : "border border-[var(--line)] bg-[var(--surface)] text-[var(--ink)]"
-              }`}
+              key={message.id}
+              className={`flex ${isUser ? "justify-end" : "justify-start"}`}
             >
-              {message.text}
+              <div
+                className={`max-w-[95%] rounded-2xl px-3.5 py-2.5 text-[15px] font-semibold leading-snug transition ${
+                  isUser
+                    ? "bg-[#1cb0f6] text-white"
+                    : isLatest
+                      ? "border border-[#a4e5ff] bg-[#e8f8ff] text-[var(--ink)]"
+                      : "border border-transparent bg-transparent text-[#b0b0b0]"
+                }`}
+              >
+                {message.text}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         <div ref={bottomRef} />
       </div>
 
-      <div className="border-t border-[var(--line)] p-3">
+      {/* Pill input + mascot */}
+      <div className="px-3 pb-3 pt-1">
         <form
-          className="flex items-center gap-2 rounded-2xl border-2 border-[var(--line)] bg-white px-3 py-2 focus-within:border-[var(--sky)]"
+          className="flex items-center gap-2"
           onSubmit={(e) => {
             e.preventDefault();
             send();
           }}
         >
-          <input
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="How can I help?"
-            className="w-full bg-transparent text-sm font-semibold text-[var(--ink)] outline-none placeholder:text-[var(--muted)]"
-          />
-          <button
-            type="submit"
-            aria-label="Send"
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[var(--brand)] text-white"
+          <span
+            aria-hidden
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] bg-[var(--brand)] shadow-[0_3px_0_var(--brand-deep)]"
           >
-            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
-              <path d="M3 11.5L21 3l-7.5 18-2.2-7.3L3 11.5z" />
-            </svg>
-          </button>
+            <span className="h-3.5 w-3.5 rounded-sm bg-[var(--ink)]" />
+          </span>
+          <div className="flex min-h-12 flex-1 items-center gap-2 rounded-full bg-white px-4 shadow-[0_0_0_2px_#e5e5e5]">
+            <input
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="How can I help?"
+              className="w-full bg-transparent text-[15px] font-semibold text-[var(--ink)] outline-none placeholder:font-medium placeholder:text-[#afafaf]"
+            />
+            <button
+              type="button"
+              aria-label="Voice input"
+              className="grid h-8 w-8 shrink-0 place-items-center text-[#afafaf] transition hover:text-[var(--ink)]"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="9" y="3" width="6" height="11" rx="3" />
+                <path d="M5 11a7 7 0 0014 0M12 18v3" strokeLinecap="round" />
+              </svg>
+            </button>
+            {draft.trim() && (
+              <button
+                type="submit"
+                aria-label="Send"
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--brand)] text-white"
+              >
+                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor">
+                  <path d="M3 11.5L21 3l-7.5 18-2.2-7.3L3 11.5z" />
+                </svg>
+              </button>
+            )}
+          </div>
         </form>
       </div>
     </aside>

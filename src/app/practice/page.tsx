@@ -186,8 +186,8 @@ function PracticeInner() {
       <div className="relative flex min-h-0 flex-1">
         {/* Desktop side chat */}
         <div
-          className={`hidden h-full shrink-0 border-r border-[var(--line)] transition-all duration-300 lg:flex ${
-            chatOpen ? "w-[340px] xl:w-[380px]" : "w-0 overflow-hidden border-r-0"
+          className={`hidden h-full shrink-0 border-r border-[#e8e8e8] bg-[#f7f7f7] transition-all duration-300 lg:flex ${
+            chatOpen ? "w-[320px] xl:w-[360px]" : "w-0 overflow-hidden border-r-0"
           }`}
         >
           <SideChat
