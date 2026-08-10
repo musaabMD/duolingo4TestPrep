@@ -304,15 +304,6 @@ function PracticeInner() {
                 >
                   Back
                 </button>
-                {answered && (
-                  <p
-                    className={`hidden text-xl font-extrabold sm:block ${
-                      isCorrect ? "text-[var(--brand-deep)]" : "text-[var(--warn)]"
-                    }`}
-                  >
-                    {isCorrect ? "Correct!" : "Incorrect"}
-                  </p>
-                )}
               </div>
 
               <div className="flex items-center gap-2">
