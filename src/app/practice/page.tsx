@@ -302,19 +302,15 @@ function PracticeInner() {
                 <path d="M5 6h14v10H8l-3 3V6z" strokeLinejoin="round" />
               </svg>
             </button>
-            <div className="min-h-10 font-extrabold">
-              {checked ? (
-                <p
-                  className={`text-2xl ${
-                    isCorrect ? "text-[var(--brand-deep)]" : "text-[var(--warn)]"
-                  }`}
-                >
-                  {isCorrect ? "Correct!" : "Incorrect"}
-                </p>
-              ) : (
-                <p className="text-lg text-[var(--muted)]">Select an answer</p>
-              )}
-            </div>
+            {checked && (
+              <p
+                className={`text-2xl font-extrabold ${
+                  isCorrect ? "text-[var(--brand-deep)]" : "text-[var(--warn)]"
+                }`}
+              >
+                {isCorrect ? "Correct!" : "Incorrect"}
+              </p>
+            )}
           </div>
 
           <div className="flex w-full items-center gap-3 sm:w-auto sm:justify-end">
