@@ -165,6 +165,21 @@ function PracticeInner() {
             <svg viewBox="0 0 24 24" className="h-5 w-5 fill-[var(--amber)]">
               <path d="M13 2L4 14h7l-1 8 10-14h-7l0-6z" />
             </svg>
+            <button
+              type="button"
+              onClick={() => setChatOpen((v) => !v)}
+              aria-label={chatOpen ? "Close chat" : "Open chat"}
+              aria-pressed={chatOpen}
+              className={`grid h-9 w-9 place-items-center rounded-full transition ${
+                chatOpen
+                  ? "bg-[#eaf7ff] text-[var(--sky)]"
+                  : "text-[#afafaf] hover:bg-white hover:text-[var(--ink)]"
+              }`}
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 6h14v10H8l-3 3V6z" strokeLinejoin="round" />
+              </svg>
+            </button>
           </div>
         </div>
       </header>
@@ -277,41 +292,10 @@ function PracticeInner() {
             }`}
           >
             <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <span
-                  aria-hidden
-                  className="grid h-11 w-11 place-items-center rounded-[14px] bg-[var(--brand)] shadow-[0_3px_0_var(--brand-deep)]"
-                >
-                  <span className="h-3.5 w-3.5 rounded-sm bg-[var(--ink)]" />
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setChatOpen((v) => !v)}
-                  aria-label={chatOpen ? "Close chat" : "Open chat"}
-                  aria-pressed={chatOpen}
-                  className={`grid h-10 w-10 place-items-center rounded-full border transition ${
-                    chatOpen
-                      ? "border-[var(--sky)] bg-[#eaf7ff] text-[var(--sky)]"
-                      : "border-[var(--line)] bg-white text-[#afafaf] hover:bg-[var(--surface)]"
-                  }`}
-                >
-                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M5 6h14v10H8l-3 3V6z" strokeLinejoin="round" />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  aria-label="Voice"
-                  className="grid h-10 w-10 place-items-center rounded-full border border-[var(--line)] text-[#afafaf] hover:bg-[var(--surface)]"
-                >
-                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="9" y="3" width="6" height="11" rx="3" />
-                    <path d="M5 11a7 7 0 0014 0M12 18v3" strokeLinecap="round" />
-                  </svg>
-                </button>
+              <div className="min-h-10">
                 {checked && (
                   <p
-                    className={`ml-2 hidden text-xl font-extrabold sm:block ${
+                    className={`text-xl font-extrabold ${
                       isCorrect ? "text-[var(--brand-deep)]" : "text-[var(--warn)]"
                     }`}
                   >
