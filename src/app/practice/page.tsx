@@ -129,7 +129,7 @@ function PracticeInner() {
   return (
     <div className="flex h-dvh w-full flex-col overflow-hidden bg-[#f7f7f7]">
       {/* Top bar */}
-      <header className="shrink-0 px-4 py-3 sm:px-6 lg:px-8">
+      <header className="shrink-0 bg-[#f7f7f7] px-4 py-3 sm:px-6 lg:px-8">
         <div className="flex w-full items-center gap-3 sm:gap-4">
           <Link
             href="/dashboard"
@@ -170,7 +170,7 @@ function PracticeInner() {
               onClick={() => setChatOpen((v) => !v)}
               aria-label={chatOpen ? "Close chat" : "Open chat"}
               aria-pressed={chatOpen}
-              className={`grid h-9 w-9 place-items-center rounded-full transition ${
+              className={`grid h-9 w-9 place-items-center rounded-full transition md:hidden ${
                 chatOpen
                   ? "bg-[#eaf7ff] text-[var(--sky)]"
                   : "text-[#afafaf] hover:bg-white hover:text-[var(--ink)]"
@@ -184,12 +184,12 @@ function PracticeInner() {
         </div>
       </header>
 
-      {/* Body */}
-      <div className="relative flex min-h-0 flex-1 px-3 pb-3 sm:px-5 lg:px-6">
-        {/* Side chat — md+; collapsed shows reopen tab */}
+      {/* Body: gray chrome + full white question plane */}
+      <div className="relative flex min-h-0 flex-1 gap-0 md:pl-2 md:pr-3 md:pb-3 lg:pr-4">
+        {/* Side chat sits on gray page chrome */}
         <div
           className={`relative hidden h-full shrink-0 transition-all duration-300 ease-out md:flex ${
-            chatOpen ? "mr-3 w-[280px] lg:w-[300px] xl:w-[340px]" : "mr-2 w-14"
+            chatOpen ? "w-[280px] lg:w-[300px] xl:w-[340px]" : "w-14"
           }`}
         >
           {chatOpen ? (
@@ -200,13 +200,13 @@ function PracticeInner() {
                 isCorrect={answered ? isCorrect : null}
                 open
                 onClose={() => setChatOpen(false)}
-                className="w-full rounded-3xl"
+                className="w-full"
               />
               <button
                 type="button"
                 aria-label="Close side chat"
                 onClick={() => setChatOpen(false)}
-                className="absolute top-1/2 -right-2 z-20 h-10 w-3 -translate-y-1/2 rounded-full bg-[#d9d9d9] hover:bg-[#c4c4c4]"
+                className="absolute top-1/2 -right-1.5 z-20 h-10 w-3 -translate-y-1/2 rounded-full bg-[#d9d9d9] hover:bg-[#c4c4c4]"
               />
             </>
           ) : (
@@ -214,7 +214,7 @@ function PracticeInner() {
               type="button"
               aria-label="Open side chat"
               onClick={() => setChatOpen(true)}
-              className="flex h-full w-full flex-col items-center gap-3 rounded-3xl border border-[#e5e5e5] bg-white py-5 shadow-[0_2px_16px_rgba(0,0,0,0.04)] transition hover:bg-[#fafafa]"
+              className="flex h-full w-full flex-col items-center gap-3 py-5 transition hover:bg-white/50"
             >
               <span className="grid h-10 w-10 place-items-center rounded-2xl bg-[var(--brand)] text-white shadow-[0_3px_0_var(--brand-deep)]">
                 <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.25">
@@ -231,13 +231,9 @@ function PracticeInner() {
           )}
         </div>
 
-        {/* Question card — expands when chat closed (image 3) */}
-        <main
-          className={`flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-[#e5e5e5] bg-white shadow-[0_2px_16px_rgba(0,0,0,0.04)] transition-all duration-300 ${
-            chatOpen ? "" : "mx-auto max-w-5xl"
-          }`}
-        >
-          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pb-28 pt-5 sm:px-10 sm:pt-8">
+        {/* Full remaining area = white question background */}
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white md:rounded-[1.75rem] md:border md:border-[#e5e5e5]">
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pb-28 pt-5 sm:px-10 sm:pt-8 lg:px-14">
             {!chatOpen && (
               <div className="mb-4 flex items-center gap-1">
                 <button
@@ -253,7 +249,7 @@ function PracticeInner() {
               </div>
             )}
 
-            <div className="mx-auto w-full max-w-2xl flex-1">
+            <div className="mx-auto w-full max-w-3xl flex-1">
               <p className="text-center text-sm font-bold uppercase tracking-wide text-[var(--muted)] sm:text-left">
                 {question.topic}
               </p>

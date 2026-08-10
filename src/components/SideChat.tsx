@@ -125,7 +125,7 @@ function SideChatPanel({
 
   return (
     <aside
-      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-white ${className}`}
+      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#f7f7f7] ${className}`}
     >
       <div className="flex items-start px-2 pt-3">
         <div className="flex flex-col">
