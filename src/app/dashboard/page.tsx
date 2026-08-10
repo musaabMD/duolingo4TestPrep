@@ -14,62 +14,61 @@ export default function DashboardPage() {
   const exam = getExam(profile.examId);
 
   return (
-    <div className="min-h-dvh bg-[var(--background)]">
-      <div className="hero-atmosphere absolute inset-x-0 top-0 -z-10 h-80" />
+    <div className="min-h-dvh w-full bg-white">
       <SiteHeader compact />
 
-      <main className="mx-auto max-w-5xl px-4 pb-16 pt-4 sm:px-8">
+      <main className="mx-auto w-full max-w-6xl px-5 pb-16 pt-6 sm:px-8 lg:px-12">
         <div className="animate-rise">
           <p className="text-sm font-extrabold uppercase tracking-[0.18em] text-[var(--brand-deep)]">
             Your prep hub
           </p>
-          <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight text-[var(--ink)] sm:text-5xl">
+          <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-[var(--ink)] sm:text-5xl">
             DrKard
           </h1>
-          <p className="mt-2 max-w-xl text-lg font-semibold text-[var(--muted)]">
+          <p className="mt-2 max-w-2xl text-lg font-semibold text-[var(--muted)]">
             {exam
               ? `${exam.name} countdown and daily drills in one place.`
               : "Finish onboarding to lock in your exam date and plan."}
           </p>
         </div>
 
-        <div className="mt-6 animate-rise-delay">
+        <div className="mt-6 max-w-2xl animate-rise-delay">
           <SearchBox placeholder="Search topics or jump to an exam…" />
         </div>
 
-        <section className="mt-8 grid gap-4 md:grid-cols-[1.2fr_0.8fr]">
-          <div className="rounded-[1.75rem] bg-[var(--ink)] p-6 text-white shadow-[0_24px_50px_rgba(15,40,28,0.18)]">
-            <p className="text-sm font-bold uppercase tracking-[0.18em] text-white/55">
+        <section className="mt-8 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+          <div className="rounded-3xl border-2 border-[var(--line)] bg-[var(--surface)] p-8">
+            <p className="text-sm font-extrabold uppercase tracking-[0.18em] text-[var(--muted)]">
               Exam date
             </p>
-            <p className="mt-3 font-[family-name:var(--font-display)] text-5xl font-bold sm:text-6xl">
+            <p className="mt-3 text-6xl font-black text-[var(--ink)] sm:text-7xl">
               {remaining === null ? "—" : Math.max(remaining, 0)}
             </p>
-            <p className="mt-2 text-xl font-bold text-[var(--brand-soft)]">
+            <p className="mt-2 text-2xl font-extrabold text-[var(--brand-deep)]">
               {formatRemaining(remaining)}
             </p>
-            <p className="mt-4 font-semibold text-white/70">
+            <p className="mt-4 text-lg font-semibold text-[var(--muted)]">
               {exam?.name ?? "No exam selected"}
               {profile.examDate ? ` · ${profile.examDate}` : ""}
             </p>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 href={`/practice?exam=${profile.examId ?? "sat"}`}
-                className="inline-flex min-h-12 items-center justify-center rounded-full bg-[var(--brand)] px-6 font-extrabold text-[var(--ink)]"
+                className="inline-flex min-h-14 items-center justify-center rounded-2xl bg-[var(--brand)] px-8 text-lg font-extrabold text-white shadow-[0_4px_0_var(--brand-deep)]"
               >
                 Continue practice
               </Link>
               <Link
                 href="/onboarding"
-                className="inline-flex min-h-12 items-center justify-center rounded-full bg-white/10 px-6 font-extrabold text-white"
+                className="inline-flex min-h-14 items-center justify-center rounded-2xl border-2 border-[var(--line)] bg-white px-8 text-lg font-extrabold text-[var(--ink)]"
               >
                 {profile.completed ? "Edit plan" : "Start onboarding"}
               </Link>
             </div>
           </div>
 
-          <div className="grid gap-4">
-            <div className="rounded-[1.75rem] border-2 border-[var(--line)] bg-white p-5">
+          <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+            <div className="rounded-3xl border-2 border-[var(--line)] bg-white p-5">
               <p className="text-xs font-extrabold uppercase tracking-wide text-[var(--muted)]">
                 Streak
               </p>
@@ -80,7 +79,7 @@ export default function DashboardPage() {
                 </span>
               </p>
             </div>
-            <div className="rounded-[1.75rem] border-2 border-[var(--line)] bg-white p-5">
+            <div className="rounded-3xl border-2 border-[var(--line)] bg-white p-5">
               <p className="text-xs font-extrabold uppercase tracking-wide text-[var(--muted)]">
                 Total XP
               </p>
@@ -89,7 +88,7 @@ export default function DashboardPage() {
                 <span className="ml-2 text-[var(--brand)]">✦</span>
               </p>
             </div>
-            <div className="rounded-[1.75rem] border-2 border-[var(--line)] bg-white p-5">
+            <div className="rounded-3xl border-2 border-[var(--line)] bg-white p-5">
               <p className="text-xs font-extrabold uppercase tracking-wide text-[var(--muted)]">
                 Daily goal
               </p>
@@ -105,23 +104,23 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <section className="mt-8 rounded-[1.75rem] border-2 border-[var(--line)] bg-white p-6">
-          <h2 className="text-xl font-extrabold">Today&apos;s path</h2>
+        <section className="mt-8 rounded-3xl border-2 border-[var(--line)] bg-white p-6 sm:p-8">
+          <h2 className="text-2xl font-extrabold text-[var(--ink)]">Today&apos;s path</h2>
           <p className="mt-1 font-semibold text-[var(--muted)]">
-            Short sets keep you exam-ready without marathon sessions.
+            Short MCQ sets keep you exam-ready.
           </p>
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
             {(exam?.topics ?? ["Warm-up", "Core skills", "Review"]).map(
               (topic, i) => (
                 <Link
                   key={topic}
                   href={`/practice?exam=${profile.examId ?? "sat"}`}
-                  className="rounded-2xl bg-[var(--mint)] p-4 transition hover:brightness-95"
+                  className="rounded-2xl border-2 border-[var(--line)] bg-[var(--surface)] p-5 transition hover:border-[var(--brand)]"
                 >
                   <p className="text-xs font-extrabold uppercase tracking-wide text-[var(--brand-deep)]">
                     Set {i + 1}
                   </p>
-                  <p className="mt-1 text-lg font-extrabold text-[var(--ink)]">
+                  <p className="mt-1 text-xl font-extrabold text-[var(--ink)]">
                     {topic}
                   </p>
                 </Link>

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
-import { PillButton } from "@/components/PillButton";
 import { useOnboardingStore } from "@/lib/hooks";
 import { questionsForExam } from "@/lib/questions";
 import { addXp, bumpStreak } from "@/lib/storage";
@@ -31,6 +30,7 @@ function PracticeInner() {
     selected !== null &&
     question !== undefined &&
     selected === question.correctIndex;
+  const progressPct = ((index + (checked ? 1 : 0.35)) / questions.length) * 100;
 
   function handleCheck() {
     if (selected === null || !question) return;
@@ -63,45 +63,54 @@ function PracticeInner() {
 
   if (done) {
     return (
-      <div className="mx-auto flex min-h-dvh max-w-lg flex-col items-center justify-center bg-white px-6 text-center">
-        <div className="animate-float mb-6 grid h-28 w-28 place-items-center rounded-[2rem] bg-[linear-gradient(145deg,#d9c2ff,#8b5cf6)] shadow-[0_18px_40px_rgba(139,92,246,0.25)]">
-          <div className="h-12 w-4 rounded-full bg-white" />
+      <div className="flex min-h-dvh w-full flex-col bg-white">
+        <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center px-6 text-center">
+          <div className="animate-float mb-8 grid h-28 w-28 place-items-center rounded-[2rem] bg-[#ce82ff]">
+            <div className="h-14 w-5 rounded-full bg-white" />
+          </div>
+          <h1 className="animate-rise text-4xl font-extrabold tracking-tight text-[var(--ink)] sm:text-5xl">
+            Practice complete!
+          </h1>
+          <p className="mt-3 text-xl font-bold text-[var(--muted)]">
+            Nice — let&apos;s keep the momentum going
+          </p>
+          <div className="mt-12">
+            <p className="text-sm font-extrabold uppercase tracking-[0.2em] text-[var(--ink)]">
+              Total XP
+            </p>
+            <p className="mt-2 text-6xl font-black text-[var(--ink)]">
+              {earnedXp}
+              <span className="ml-2 text-[var(--brand)]">✦</span>
+            </p>
+            <p className="mt-3 font-bold text-[var(--muted)]">
+              {correctCount}/{questions.length} correct · {streak}-day streak
+            </p>
+          </div>
         </div>
-        <h1 className="animate-rise text-4xl font-extrabold tracking-tight">
-          Practice complete!
-        </h1>
-        <p className="mt-2 text-lg font-semibold text-[var(--muted)]">
-          Nice — let&apos;s keep the momentum going
-        </p>
-        <div className="mt-10">
-          <p className="text-sm font-extrabold uppercase tracking-[0.2em]">
-            Total XP
-          </p>
-          <p className="mt-2 font-[family-name:var(--font-display)] text-6xl font-bold">
-            {earnedXp}
-            <span className="ml-2 text-[var(--brand)]">✦</span>
-          </p>
-          <p className="mt-3 font-bold text-[var(--muted)]">
-            {correctCount}/{questions.length} correct · {streak}-day streak
-          </p>
-        </div>
-        <div className="mt-12 w-full space-y-3">
-          <PillButton variant="primary" onClick={() => router.push("/dashboard")}>
-            Continue
-          </PillButton>
-          <PillButton
-            variant="ghost"
-            onClick={() => {
-              setIndex(0);
-              setSelected(null);
-              setChecked(false);
-              setShowWhy(false);
-              setCorrectCount(0);
-              setDone(false);
-            }}
-          >
-            Practice again
-          </PillButton>
+        <div className="border-t border-[var(--line)] px-6 py-5">
+          <div className="mx-auto flex w-full max-w-3xl justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setIndex(0);
+                setSelected(null);
+                setChecked(false);
+                setShowWhy(false);
+                setCorrectCount(0);
+                setDone(false);
+              }}
+              className="min-h-14 min-w-40 rounded-2xl bg-[var(--surface)] px-8 text-lg font-extrabold text-[var(--ink)]"
+            >
+              Again
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/dashboard")}
+              className="min-h-14 min-w-56 rounded-2xl bg-[var(--brand)] px-10 text-lg font-extrabold text-white shadow-[0_4px_0_var(--brand-deep)]"
+            >
+              Continue
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -109,114 +118,143 @@ function PracticeInner() {
 
   if (!question) {
     return (
-      <div className="grid min-h-dvh place-items-center font-bold">
+      <div className="grid min-h-dvh place-items-center bg-white font-bold text-[var(--muted)]">
         Loading practice…
       </div>
     );
   }
 
   return (
-    <div className="relative mx-auto flex min-h-dvh max-w-3xl flex-col bg-[#f7f7f7] px-4 pb-28 pt-4 sm:px-6">
-      <div className="mb-6 flex items-center justify-between gap-3">
-        <Link
-          href="/dashboard"
-          aria-label="Close practice"
-          className="grid h-10 w-10 place-items-center rounded-full text-[var(--muted)] hover:bg-black/5"
-        >
-          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
-          </svg>
-        </Link>
-        <div className="flex items-center gap-2">
-          {questions.map((item, i) => (
-            <span
-              key={item.id}
-              className={`h-2.5 w-2.5 rounded-full ${
-                i === index
-                  ? "bg-[var(--brand)]"
-                  : i < index
-                    ? "bg-[#c4c4c4]"
-                    : "bg-[#e0e0e0]"
-              }`}
+    <div className="flex min-h-dvh w-full flex-col bg-white">
+      {/* Full-width Duolingo-style top bar */}
+      <header className="w-full border-b border-[var(--line)] px-4 py-4 sm:px-8 lg:px-12">
+        <div className="mx-auto flex w-full max-w-5xl items-center gap-4">
+          <Link
+            href="/dashboard"
+            aria-label="Close practice"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl text-[#afafaf] transition hover:bg-[var(--surface)]"
+          >
+            <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
+            </svg>
+          </Link>
+
+          <div className="h-4 flex-1 overflow-hidden rounded-full bg-[var(--track)]">
+            <div
+              className="h-full rounded-full bg-[var(--brand)] transition-all duration-500"
+              style={{ width: `${Math.min(100, progressPct)}%` }}
             />
-          ))}
-        </div>
-        <div className="flex items-center gap-2 text-sm font-extrabold text-[var(--amber)]">
-          ★ {correctCount * 10}
-        </div>
-      </div>
+          </div>
 
-      <div className="mx-auto w-full max-w-xl flex-1 rounded-[1.75rem] border border-[var(--line)] bg-white p-5 shadow-sm sm:p-8">
-        <p className="text-xs font-extrabold uppercase tracking-wide text-[var(--muted)]">
-          {question.topic}
-        </p>
-        <h1 className="mt-3 text-xl font-extrabold leading-snug tracking-tight text-[var(--ink)] sm:text-2xl">
-          {question.prompt}
-        </h1>
+          <div className="flex shrink-0 items-center gap-3 text-base font-extrabold">
+            <span className="flex items-center gap-1 text-[var(--amber)]">
+              <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">
+                <path d="M12 2l2.9 6.3L22 9.3l-5 4.9 1.2 7-6.2-3.3L5.8 21l1.2-7-5-4.9 7.1-1z" />
+              </svg>
+              {correctCount * 10}
+            </span>
+            <span className="flex items-center text-[var(--brand)]">
+              <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">
+                <path d="M13 2L4 14h7l-1 8 10-14h-7l0-6z" />
+              </svg>
+            </span>
+          </div>
+        </div>
+      </header>
 
-        <div className="mt-8 space-y-3">
-          {question.choices.map((choice, i) => {
-            let state: "correct" | "wrong" | undefined;
-            if (checked) {
-              if (i === question.correctIndex) state = "correct";
-              else if (i === selected) state = "wrong";
-            }
-            return (
-              <button
-                key={choice}
-                type="button"
-                disabled={checked}
-                data-selected={!checked && selected === i ? "true" : "false"}
-                data-state={state}
-                onClick={() => setSelected(i)}
-                className="choice-card relative w-full rounded-2xl px-4 py-4 text-left text-base font-bold sm:text-lg"
-              >
-                {choice}
-                {state === "correct" && (
-                  <span className="absolute -right-2 -top-2 grid h-7 w-7 place-items-center rounded-full bg-[var(--brand)] text-sm text-white">
-                    ✓
+      {/* Full white question stage — MCQ only */}
+      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-5 pb-36 pt-10 sm:px-10 lg:px-12">
+        <div className="animate-rise flex flex-1 flex-col">
+          <div className="mb-8 flex items-start gap-3">
+            <button
+              type="button"
+              aria-label="Flag question"
+              className="mt-1 grid h-9 w-9 place-items-center rounded-full text-[#c4c4c4] hover:bg-[var(--surface)]"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 21V4h10l-1.5 4L19 12H5" strokeLinejoin="round" />
+              </svg>
+            </button>
+            <div className="flex-1">
+              <p className="text-sm font-bold uppercase tracking-wide text-[var(--muted)]">
+                {question.topic}
+              </p>
+              <h1 className="mt-2 text-2xl font-extrabold leading-snug tracking-tight text-[var(--ink)] sm:text-3xl">
+                {question.prompt}
+              </h1>
+            </div>
+          </div>
+
+          <div className="mt-auto space-y-3 pb-4 sm:mt-10">
+            {question.choices.map((choice, i) => {
+              let state: "correct" | "wrong" | undefined;
+              if (checked) {
+                if (i === question.correctIndex) state = "correct";
+                else if (i === selected) state = "wrong";
+              }
+              const letter = String.fromCharCode(65 + i);
+              return (
+                <button
+                  key={choice}
+                  type="button"
+                  disabled={checked}
+                  data-selected={!checked && selected === i ? "true" : "false"}
+                  data-state={state}
+                  onClick={() => setSelected(i)}
+                  className="mcq-option relative flex w-full items-center gap-4 rounded-2xl px-4 py-4 text-left sm:px-5 sm:py-5"
+                >
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[var(--surface)] text-sm font-extrabold text-[var(--muted)]">
+                    {letter}
                   </span>
-                )}
-                {state === "wrong" && (
-                  <span className="absolute -right-2 -top-2 grid h-7 w-7 place-items-center rounded-full bg-[var(--warn)] text-sm text-white">
-                    ✕
-                  </span>
-                )}
-              </button>
-            );
-          })}
+                  <span className="flex-1 text-lg font-bold sm:text-xl">{choice}</span>
+                  {state === "correct" && (
+                    <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--brand)] text-white">
+                      ✓
+                    </span>
+                  )}
+                  {state === "wrong" && (
+                    <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--warn)] text-white">
+                      ✕
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      </main>
 
-      <div
-        className={`fixed inset-x-0 bottom-0 border-t px-4 py-4 sm:px-6 ${
+      {/* Full-bleed footer like Duolingo */}
+      <footer
+        className={`fixed inset-x-0 bottom-0 border-t px-4 py-5 sm:px-8 ${
           !checked
             ? "border-[var(--line)] bg-white"
             : isCorrect
-              ? "border-[#b6e07e] bg-[var(--ok-soft)]"
-              : "border-[#f5b4b4] bg-[var(--warn-soft)]"
+              ? "border-transparent bg-[var(--ok-soft)]"
+              : "border-transparent bg-[var(--warn-soft)]"
         }`}
       >
-        <div className="mx-auto flex max-w-3xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-h-8 font-extrabold">
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-h-10 font-extrabold">
             {checked ? (
-              <span
-                className={
+              <p
+                className={`text-2xl ${
                   isCorrect ? "text-[var(--brand-deep)]" : "text-[var(--warn)]"
-                }
+                }`}
               >
                 {isCorrect ? "Correct!" : "Incorrect"}
-              </span>
+              </p>
             ) : (
-              <span className="text-[var(--muted)]">Select an answer</span>
+              <p className="text-lg text-[var(--muted)] sm:invisible">Select an answer</p>
             )}
           </div>
-          <div className="flex gap-2">
+
+          <div className="flex w-full items-center gap-3 sm:w-auto sm:justify-end">
             {checked && (
               <button
                 type="button"
                 onClick={() => setShowWhy(true)}
-                className="min-h-12 rounded-2xl bg-[var(--ink)] px-5 text-base font-extrabold text-white"
+                className="min-h-14 rounded-2xl border-2 border-b-4 border-[#e5e5e5] bg-white px-6 text-lg font-extrabold text-[var(--muted)] transition hover:bg-[var(--surface)]"
               >
                 Why?
               </button>
@@ -225,14 +263,14 @@ function PracticeInner() {
               type="button"
               disabled={selected === null}
               onClick={handleContinue}
-              className={`min-h-12 flex-1 rounded-2xl px-6 text-base font-extrabold sm:flex-none ${
+              className={`min-h-14 flex-1 rounded-2xl px-12 text-lg font-extrabold sm:min-w-48 sm:flex-none ${
                 selected === null
-                  ? "bg-[var(--track)] text-[#afafaf]"
+                  ? "cursor-not-allowed bg-[var(--track)] text-[#afafaf]"
                   : checked
                     ? isCorrect
-                      ? "bg-[var(--brand)] text-white"
-                      : "bg-[var(--ink)] text-white"
-                    : "bg-[var(--ink)] text-white"
+                      ? "bg-[var(--brand)] text-white shadow-[0_4px_0_var(--brand-deep)]"
+                      : "bg-[var(--warn)] text-white shadow-[0_4px_0_#ea2b2b]"
+                    : "bg-[var(--brand)] text-white shadow-[0_4px_0_var(--brand-deep)]"
               }`}
             >
               {checked
@@ -243,35 +281,35 @@ function PracticeInner() {
             </button>
           </div>
         </div>
-      </div>
+      </footer>
 
       {showWhy && (
-        <div className="fixed inset-0 z-40 grid place-items-center bg-black/45 p-4">
-          <div className="animate-rise w-full max-w-md rounded-[1.75rem] bg-white p-5 shadow-2xl">
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
+          <div className="animate-rise w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-extrabold">Explanation</h2>
+              <h2 className="text-2xl font-extrabold text-[var(--ink)]">Explanation</h2>
               <button
                 type="button"
                 onClick={() => setShowWhy(false)}
                 aria-label="Close"
-                className="grid h-9 w-9 place-items-center rounded-full hover:bg-black/5"
+                className="grid h-10 w-10 place-items-center rounded-full text-[var(--muted)] hover:bg-[var(--surface)]"
               >
                 ✕
               </button>
             </div>
-            <div className="rounded-2xl border border-[var(--line)] p-4">
-              <p className="font-semibold text-[var(--ink)]">{question.prompt}</p>
-              <p className="mt-3 inline-flex rounded-full bg-[var(--ink)] px-3 py-1 text-sm font-bold text-white">
+            <div className="rounded-2xl border-2 border-[var(--line)] p-5">
+              <p className="font-bold text-[var(--ink)]">{question.prompt}</p>
+              <p className="mt-4 inline-flex rounded-2xl bg-[var(--ok-soft)] px-4 py-2 font-extrabold text-[var(--brand-deep)]">
                 {question.choices[question.correctIndex]}
               </p>
-              <p className="mt-4 font-semibold text-[var(--muted)]">
+              <p className="mt-4 font-semibold leading-relaxed text-[var(--muted)]">
                 {question.explanation}
               </p>
             </div>
             <button
               type="button"
               onClick={() => setShowWhy(false)}
-              className="mt-5 min-h-12 w-full rounded-full bg-[var(--ink)] text-base font-extrabold text-white"
+              className="mt-5 min-h-14 w-full rounded-2xl bg-[var(--brand)] text-lg font-extrabold text-white shadow-[0_4px_0_var(--brand-deep)]"
             >
               Got it
             </button>
@@ -286,7 +324,7 @@ export default function PracticePage() {
   return (
     <Suspense
       fallback={
-        <div className="grid min-h-dvh place-items-center font-bold text-[var(--muted)]">
+        <div className="grid min-h-dvh place-items-center bg-white font-bold text-[var(--muted)]">
           Loading practice…
         </div>
       }
