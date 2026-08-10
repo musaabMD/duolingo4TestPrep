@@ -19,39 +19,43 @@ function PracticeInner() {
 
   const questions = useMemo(() => questionsForExam(examId), [examId]);
   const [index, setIndex] = useState(0);
-  const [selected, setSelected] = useState<number | null>(null);
-  const [checked, setChecked] = useState(false);
+  const [answers, setAnswers] = useState<Record<number, number>>({});
   const [showWhy, setShowWhy] = useState(false);
   // Closed by default = full question card (image 3); open = side chat (image 2)
   const [chatOpen, setChatOpen] = useState(false);
-  const [correctCount, setCorrectCount] = useState(0);
   const [done, setDone] = useState(false);
   const [earnedXp, setEarnedXp] = useState(0);
   const [streak, setStreak] = useState(1);
 
   const question: PracticeQuestion | undefined = questions[index];
+  const selected = answers[index] ?? null;
+  const answered = selected !== null;
   const isCorrect =
     selected !== null &&
     question !== undefined &&
     selected === question.correctIndex;
-  const progressPct = ((index + (checked ? 1 : 0.35)) / questions.length) * 100;
+  const correctCount = questions.reduce((count, item, i) => {
+    return answers[i] === item.correctIndex ? count + 1 : count;
+  }, 0);
+  const progressPct = ((index + (answered ? 1 : 0.35)) / questions.length) * 100;
   const remainingDots = Math.max(0, questions.length - index - 1);
+  const isLast = index >= questions.length - 1;
 
-  function handleCheck() {
-    if (selected === null || !question) return;
-    setChecked(true);
-    if (selected === question.correctIndex) {
-      setCorrectCount((count) => count + 1);
-    }
+  function handleSelect(optionIndex: number) {
+    if (answered) return;
+    setAnswers((prev) => ({ ...prev, [index]: optionIndex }));
   }
 
-  function handleContinue() {
-    if (!checked) {
-      handleCheck();
-      return;
-    }
+  function handleBack() {
+    if (index <= 0) return;
+    setIndex((value) => value - 1);
+    setShowWhy(false);
+  }
 
-    if (index >= questions.length - 1) {
+  function handleNext() {
+    if (!answered) return;
+
+    if (isLast) {
       const sessionXp = Math.max(10, correctCount * 10 + 10);
       addXp(sessionXp);
       setEarnedXp(sessionXp);
@@ -61,8 +65,6 @@ function PracticeInner() {
     }
 
     setIndex((value) => value + 1);
-    setSelected(null);
-    setChecked(false);
     setShowWhy(false);
   }
 
@@ -96,9 +98,7 @@ function PracticeInner() {
               type="button"
               onClick={() => {
                 setIndex(0);
-                setSelected(null);
-                setChecked(false);
-                setCorrectCount(0);
+                setAnswers({});
                 setDone(false);
               }}
               className="min-h-14 min-w-40 rounded-2xl bg-[var(--surface)] px-8 text-lg font-extrabold"
@@ -196,8 +196,8 @@ function PracticeInner() {
             <>
               <SideChat
                 question={question}
-                checked={checked}
-                isCorrect={checked ? isCorrect : null}
+                checked={answered}
+                isCorrect={answered ? isCorrect : null}
                 open
                 onClose={() => setChatOpen(false)}
                 className="w-full rounded-3xl"
@@ -245,7 +245,7 @@ function PracticeInner() {
               <div className="mt-8 space-y-3 sm:mt-10">
                 {question.choices.map((choice, i) => {
                   let state: "correct" | "wrong" | undefined;
-                  if (checked) {
+                  if (answered) {
                     if (i === question.correctIndex) state = "correct";
                     else if (i === selected) state = "wrong";
                   }
@@ -254,10 +254,10 @@ function PracticeInner() {
                     <button
                       key={choice}
                       type="button"
-                      disabled={checked}
-                      data-selected={!checked && selected === i ? "true" : "false"}
+                      disabled={answered}
+                      data-selected={!answered && selected === i ? "true" : "false"}
                       data-state={state}
-                      onClick={() => setSelected(i)}
+                      onClick={() => handleSelect(i)}
                       className="mcq-option relative flex w-full items-center gap-4 rounded-2xl px-4 py-4 text-left sm:px-5 sm:py-5"
                     >
                       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--surface)] text-sm font-extrabold text-[var(--muted)]">
@@ -281,10 +281,9 @@ function PracticeInner() {
             </div>
           </div>
 
-          {/* In-card footer actions when chat closed feel more Duolingo */}
           <div
             className={`shrink-0 border-t px-4 py-4 sm:px-6 ${
-              !checked
+              !answered
                 ? "border-[var(--line)] bg-white"
                 : isCorrect
                   ? "border-transparent bg-[var(--ok-soft)]"
@@ -292,10 +291,22 @@ function PracticeInner() {
             }`}
           >
             <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3">
-              <div className="min-h-10">
-                {checked && (
+              <div className="flex min-h-10 items-center gap-3">
+                <button
+                  type="button"
+                  disabled={index <= 0}
+                  onClick={handleBack}
+                  className={`min-h-12 min-w-28 rounded-2xl border-2 border-b-4 px-6 text-lg font-extrabold sm:min-w-36 ${
+                    index <= 0
+                      ? "cursor-not-allowed border-[#e5e5e5] bg-[#f0f0f0] text-[#afafaf]"
+                      : "border-[#e5e5e5] bg-white text-[var(--muted)] hover:bg-[var(--surface)]"
+                  }`}
+                >
+                  Back
+                </button>
+                {answered && (
                   <p
-                    className={`text-xl font-extrabold ${
+                    className={`hidden text-xl font-extrabold sm:block ${
                       isCorrect ? "text-[var(--brand-deep)]" : "text-[var(--warn)]"
                     }`}
                   >
@@ -305,7 +316,7 @@ function PracticeInner() {
               </div>
 
               <div className="flex items-center gap-2">
-                {checked && (
+                {answered && (
                   <button
                     type="button"
                     onClick={() => {
@@ -319,23 +330,17 @@ function PracticeInner() {
                 )}
                 <button
                   type="button"
-                  disabled={selected === null}
-                  onClick={handleContinue}
-                  className={`min-h-12 min-w-36 rounded-2xl px-10 text-lg font-extrabold sm:min-w-48 ${
-                    selected === null
+                  disabled={!answered}
+                  onClick={handleNext}
+                  className={`min-h-12 min-w-28 rounded-2xl px-8 text-lg font-extrabold sm:min-w-36 ${
+                    !answered
                       ? "cursor-not-allowed bg-[#e5e5e5] text-[#afafaf]"
-                      : checked
-                        ? isCorrect
-                          ? "bg-[var(--brand)] text-white shadow-[0_4px_0_var(--brand-deep)]"
-                          : "bg-[var(--warn)] text-white shadow-[0_4px_0_#ea2b2b]"
-                        : "bg-[var(--brand)] text-white shadow-[0_4px_0_var(--brand-deep)]"
+                      : isCorrect
+                        ? "bg-[var(--brand)] text-white shadow-[0_4px_0_var(--brand-deep)]"
+                        : "bg-[var(--warn)] text-white shadow-[0_4px_0_#ea2b2b]"
                   }`}
                 >
-                  {checked
-                    ? index >= questions.length - 1
-                      ? "Finish"
-                      : "Continue"
-                    : "Check"}
+                  {isLast ? "Finish" : "Next"}
                 </button>
               </div>
             </div>
@@ -354,8 +359,8 @@ function PracticeInner() {
             <div className="relative z-10 h-full w-[min(100%,340px)] overflow-hidden rounded-r-3xl bg-[#f7f7f7] shadow-2xl">
               <SideChat
                 question={question}
-                checked={checked}
-                isCorrect={checked ? isCorrect : null}
+                checked={answered}
+                isCorrect={answered ? isCorrect : null}
                 open
                 onClose={() => setChatOpen(false)}
                 className="h-full w-full"
