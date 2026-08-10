@@ -21,8 +21,8 @@ function PracticeInner() {
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [showWhy, setShowWhy] = useState(false);
-  // Closed by default = full question card (image 3); open = side chat (image 2)
-  const [chatOpen, setChatOpen] = useState(false);
+  // Open by default so tutor chat is visible beside the question
+  const [chatOpen, setChatOpen] = useState(true);
   const [done, setDone] = useState(false);
   const [earnedXp, setEarnedXp] = useState(0);
   const [streak, setStreak] = useState(1);
@@ -186,13 +186,13 @@ function PracticeInner() {
 
       {/* Body */}
       <div className="relative flex min-h-0 flex-1 px-3 pb-3 sm:px-5 lg:px-6">
-        {/* Side chat — open state (image 2) */}
+        {/* Side chat — md+; collapsed shows reopen tab */}
         <div
-          className={`relative hidden h-full shrink-0 transition-all duration-300 ease-out lg:flex ${
-            chatOpen ? "mr-3 w-[300px] xl:w-[340px]" : "w-0 overflow-hidden"
+          className={`relative hidden h-full shrink-0 transition-all duration-300 ease-out md:flex ${
+            chatOpen ? "mr-3 w-[280px] lg:w-[300px] xl:w-[340px]" : "mr-2 w-14"
           }`}
         >
-          {chatOpen && (
+          {chatOpen ? (
             <>
               <SideChat
                 question={question}
@@ -209,6 +209,25 @@ function PracticeInner() {
                 className="absolute top-1/2 -right-2 z-20 h-10 w-3 -translate-y-1/2 rounded-full bg-[#d9d9d9] hover:bg-[#c4c4c4]"
               />
             </>
+          ) : (
+            <button
+              type="button"
+              aria-label="Open side chat"
+              onClick={() => setChatOpen(true)}
+              className="flex h-full w-full flex-col items-center gap-3 rounded-3xl border border-[#e5e5e5] bg-white py-5 shadow-[0_2px_16px_rgba(0,0,0,0.04)] transition hover:bg-[#fafafa]"
+            >
+              <span className="grid h-10 w-10 place-items-center rounded-2xl bg-[var(--brand)] text-white shadow-[0_3px_0_var(--brand-deep)]">
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.25">
+                  <path d="M5 6h14v10H8l-3 3V6z" strokeLinejoin="round" />
+                </svg>
+              </span>
+              <span
+                className="text-xs font-extrabold tracking-wide text-[var(--muted)]"
+                style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+              >
+                Tutor
+              </span>
+            </button>
           )}
         </div>
 

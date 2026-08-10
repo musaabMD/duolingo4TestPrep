@@ -51,7 +51,7 @@ function tutorReply(
   if (q.includes("why") || q.includes("explain") || q.includes("answer")) {
     return checked
       ? question.explanation
-      : "Pick an answer and tap Check — then I can explain.";
+      : "Pick an answer first — then I can explain.";
   }
   if (q.includes("eliminate") || q.includes("wrong")) {
     return "Cross out options that are off-topic or only partially true.";
