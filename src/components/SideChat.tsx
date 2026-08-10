@@ -180,7 +180,7 @@ function SideChatPanel({
             aria-hidden
             className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] bg-[var(--brand)] shadow-[0_3px_0_var(--brand-deep)]"
           >
-            <span className="h-3.5 w-3.5 rounded-sm bg-[var(--ink)]" />
+            <span className="text-xl font-black leading-none text-white">D</span>
           </span>
           <div className="flex min-h-12 flex-1 items-center gap-2 rounded-full bg-white px-4 shadow-[0_0_0_1.5px_#e5e5e5]">
             <input
