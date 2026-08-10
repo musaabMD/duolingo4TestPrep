@@ -10,6 +10,40 @@ import {
 } from "./storage";
 import type { OnboardingState } from "./types";
 
+let cachedOnboarding: OnboardingState = defaultOnboarding;
+let cachedOnboardingRaw: string | null = null;
+let cachedXp = 0;
+let cachedXpRaw: string | null = null;
+let cachedStreak = 0;
+let cachedStreakRaw: string | null = null;
+
+function readOnboardingSnapshot(): OnboardingState {
+  if (typeof window === "undefined") return defaultOnboarding;
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw === cachedOnboardingRaw) return cachedOnboarding;
+  cachedOnboardingRaw = raw;
+  cachedOnboarding = loadOnboarding();
+  return cachedOnboarding;
+}
+
+function readXpSnapshot(): number {
+  if (typeof window === "undefined") return 0;
+  const raw = localStorage.getItem(XP_KEY);
+  if (raw === cachedXpRaw) return cachedXp;
+  cachedXpRaw = raw;
+  cachedXp = loadXp();
+  return cachedXp;
+}
+
+function readStreakSnapshot(): number {
+  if (typeof window === "undefined") return 0;
+  const raw = localStorage.getItem(STREAK_KEY);
+  if (raw === cachedStreakRaw) return cachedStreak;
+  cachedStreakRaw = raw;
+  cachedStreak = loadStreak();
+  return cachedStreak;
+}
+
 function subscribe(onStoreChange: () => void) {
   const handler = (event: StorageEvent) => {
     if (
@@ -22,25 +56,25 @@ function subscribe(onStoreChange: () => void) {
     }
   };
   window.addEventListener("storage", handler);
-  window.addEventListener("drkard-storage", onStoreChange as EventListener);
+  window.addEventListener("drkard-storage", onStoreChange);
   return () => {
     window.removeEventListener("storage", handler);
-    window.removeEventListener("drkard-storage", onStoreChange as EventListener);
+    window.removeEventListener("drkard-storage", onStoreChange);
   };
 }
 
-export function notifyStorage() {
-  window.dispatchEvent(new Event("drkard-storage"));
-}
-
 export function useOnboardingStore(): OnboardingState {
-  return useSyncExternalStore(subscribe, loadOnboarding, () => defaultOnboarding);
+  return useSyncExternalStore(
+    subscribe,
+    readOnboardingSnapshot,
+    () => defaultOnboarding,
+  );
 }
 
 export function useXp(): number {
-  return useSyncExternalStore(subscribe, loadXp, () => 0);
+  return useSyncExternalStore(subscribe, readXpSnapshot, () => 0);
 }
 
 export function useStreak(): number {
-  return useSyncExternalStore(subscribe, loadStreak, () => 0);
+  return useSyncExternalStore(subscribe, readStreakSnapshot, () => 0);
 }
