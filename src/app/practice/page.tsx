@@ -84,6 +84,9 @@ function PracticeInner() {
               {earnedXp}
               <span className="ml-2 text-[var(--brand)]">✦</span>
             </p>
+            <p className="mt-3 font-bold text-[var(--muted)]">
+              {correctCount}/{questions.length} correct · {streak}-day streak
+            </p>
           </div>
         </div>
         <div className="border-t border-[var(--line)] bg-white px-6 py-5">
