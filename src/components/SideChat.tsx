@@ -63,13 +63,13 @@ function SideChatPanel({
   question,
   checked,
   isCorrect,
-  onClose,
   className = "",
-}: Omit<SideChatProps, "open">) {
+}: Omit<SideChatProps, "open" | "onClose">) {
   const [messages, setMessages] = useState<ChatMessage[]>(() =>
     starterMessages(question),
   );
   const [draft, setDraft] = useState("");
+  const [typing, setTyping] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const lastResultKey = useRef<string | null>(null);
 
@@ -81,83 +81,83 @@ function SideChatPanel({
     const text = isCorrect
       ? `Correct! ${question.explanation}`
       : `Not quite. ${question.explanation}`;
+    setTyping(true);
     const id = window.setTimeout(() => {
+      setTyping(false);
       setMessages((prev) => [
         ...prev,
         { id: `${key}-${Date.now()}`, role: "tutor", text },
       ]);
-    }, 0);
+    }, 450);
     return () => window.clearTimeout(id);
   }, [checked, isCorrect, question.explanation, question.id]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, typing]);
 
   function send() {
     const trimmed = draft.trim();
-    if (!trimmed) return;
+    if (!trimmed || typing) return;
     setMessages((prev) => [
       ...prev,
       { id: `user-${Date.now()}`, role: "user", text: trimmed },
-      {
-        id: `tutor-${Date.now()}`,
-        role: "tutor",
-        text: tutorReply(trimmed, question, checked),
-      },
     ]);
     setDraft("");
+    setTyping(true);
+    window.setTimeout(() => {
+      setTyping(false);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `tutor-${Date.now()}`,
+          role: "tutor",
+          text: tutorReply(trimmed, question, checked),
+        },
+      ]);
+    }, 500);
   }
 
-  const lastIndex = messages.length - 1;
+  const lastTutorIndex = messages.reduce(
+    (acc, message, i) => (message.role === "tutor" ? i : acc),
+    -1,
+  );
 
   return (
     <aside
-      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#f7f7f7] ${className}`}
+      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-white ${className}`}
     >
-      <div className="flex items-start gap-1 px-2 pt-3">
+      <div className="flex items-start px-2 pt-3">
         <div className="flex flex-col">
-          {onClose && (
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close chat"
-              className="grid h-9 w-9 place-items-center rounded-xl text-[#afafaf] hover:bg-white"
-            >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.4">
-                <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
-              </svg>
-            </button>
-          )}
           <button
             type="button"
             aria-label="Flag question"
-            className="grid h-9 w-9 place-items-center rounded-full text-[#afafaf] hover:bg-white"
+            className="grid h-9 w-9 place-items-center rounded-full text-[#c4c4c4] hover:bg-[var(--surface)] hover:text-[var(--muted)]"
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M5 21V4h10l-1.5 4L19 12H5" strokeLinejoin="round" />
             </svg>
           </button>
-          <VoiceMenu />
+          <VoiceMenu iconClassName="hover:bg-[var(--surface)]" />
         </div>
       </div>
 
       <div className="flex flex-1 flex-col gap-2.5 overflow-y-auto px-4 py-3">
         {messages.map((message, i) => {
-          const isLatest = i === lastIndex;
           const isUser = message.role === "user";
+          const isActiveTutor = !isUser && i === lastTutorIndex && !typing;
           return (
             <div
               key={message.id}
               className={`flex ${isUser ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[95%] rounded-2xl px-3.5 py-2.5 text-[15px] font-semibold leading-snug ${
+                className={`max-w-[92%] rounded-[18px] border px-3.5 py-2.5 text-[15px] font-semibold leading-snug ${
                   isUser
-                    ? "bg-[#1cb0f6] text-white"
-                    : isLatest
-                      ? "border border-[#bfe9ff] bg-[#eaf7ff] text-[var(--ink)]"
-                      : "text-[#b4b4b4]"
+                    ? "border-[#e5e5e5] bg-white text-[#afafaf]"
+                    : isActiveTutor
+                      ? "border-[#d7eef8] bg-[#eef7fb] text-[var(--ink)]"
+                      : "border-[#e5e5e5] bg-white text-[#afafaf]"
                 }`}
               >
                 {message.text}
@@ -165,6 +165,20 @@ function SideChatPanel({
             </div>
           );
         })}
+        {typing && (
+          <div className="flex justify-start">
+            <div
+              aria-label="Tutor is typing"
+              className="rounded-[18px] border border-[#e5e5e5] bg-white px-4 py-3 text-[#afafaf]"
+            >
+              <span className="inline-flex gap-1">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#c4c4c4]" />
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#c4c4c4] [animation-delay:150ms]" />
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#c4c4c4] [animation-delay:300ms]" />
+              </span>
+            </div>
+          </div>
+        )}
         <div ref={bottomRef} />
       </div>
 
@@ -222,7 +236,6 @@ export function SideChat({
   checked,
   isCorrect,
   open,
-  onClose,
   className = "",
 }: SideChatProps) {
   if (!open) return null;
@@ -233,7 +246,6 @@ export function SideChat({
       question={question}
       checked={checked}
       isCorrect={isCorrect}
-      onClose={onClose}
       className={className}
     />
   );
