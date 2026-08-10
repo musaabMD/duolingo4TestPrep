@@ -294,15 +294,18 @@ function PracticeInner() {
               <div className="flex min-h-10 items-center gap-3">
                 <button
                   type="button"
+                  aria-label="Back"
                   disabled={index <= 0}
                   onClick={handleBack}
-                  className={`min-h-12 min-w-28 rounded-2xl border-2 border-b-4 px-6 text-lg font-extrabold sm:min-w-36 ${
+                  className={`grid h-12 w-12 place-items-center rounded-2xl border-2 border-b-4 ${
                     index <= 0
                       ? "cursor-not-allowed border-[#e5e5e5] bg-[#f0f0f0] text-[#afafaf]"
                       : "border-[#e5e5e5] bg-white text-[var(--muted)] hover:bg-[var(--surface)]"
                   }`}
                 >
-                  Back
+                  <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2.75">
+                    <path d="M15 5l-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 </button>
               </div>
 
@@ -321,9 +324,10 @@ function PracticeInner() {
                 )}
                 <button
                   type="button"
+                  aria-label={isLast ? "Finish" : "Next"}
                   disabled={!answered}
                   onClick={handleNext}
-                  className={`min-h-12 min-w-28 rounded-2xl px-8 text-lg font-extrabold sm:min-w-36 ${
+                  className={`grid h-12 w-12 place-items-center rounded-2xl ${
                     !answered
                       ? "cursor-not-allowed bg-[#e5e5e5] text-[#afafaf]"
                       : isCorrect
@@ -331,7 +335,9 @@ function PracticeInner() {
                         : "bg-[var(--warn)] text-white shadow-[0_4px_0_#ea2b2b]"
                   }`}
                 >
-                  {isLast ? "Finish" : "Next"}
+                  <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2.75">
+                    <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 </button>
               </div>
             </div>
