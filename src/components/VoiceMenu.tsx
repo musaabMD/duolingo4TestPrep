@@ -5,13 +5,11 @@ import { createPortal } from "react-dom";
 
 export type VoiceSettings = {
   narration: boolean;
-  voice: "melodic" | "deep";
   soundEffects: boolean;
 };
 
 const DEFAULT_SETTINGS: VoiceSettings = {
-  narration: true,
-  voice: "melodic",
+  narration: false,
   soundEffects: true,
 };
 
@@ -43,17 +41,33 @@ export function VoiceMenu({ className = "", iconClassName = "" }: VoiceMenuProps
 
   function scheduleClose() {
     clearCloseTimer();
-    closeTimer.current = window.setTimeout(() => setOpen(false), 180);
+    closeTimer.current = window.setTimeout(() => setOpen(false), 220);
+  }
+
+  function openMenu() {
+    clearCloseTimer();
+    updatePosition();
+    setOpen(true);
   }
 
   function updatePosition() {
     const button = buttonRef.current;
     if (!button) return;
     const rect = button.getBoundingClientRect();
-    const menuWidth = 250;
-    const left = Math.min(rect.right + 8, window.innerWidth - menuWidth - 12);
+    const menuWidth = 220;
+    const menuHeight = 112;
+    let left = rect.right + 10;
+    let top = rect.top - 8;
+
+    if (left + menuWidth > window.innerWidth - 12) {
+      left = Math.max(12, rect.left - menuWidth - 10);
+    }
+    if (top + menuHeight > window.innerHeight - 12) {
+      top = Math.max(12, window.innerHeight - menuHeight - 12);
+    }
+
     setCoords({
-      top: Math.max(8, rect.top),
+      top: Math.max(8, top),
       left: Math.max(8, left),
     });
   }
@@ -87,7 +101,6 @@ export function VoiceMenu({ className = "", iconClassName = "" }: VoiceMenuProps
     function onKey(event: KeyboardEvent) {
       if (event.key === "Escape") setOpen(false);
     }
-    // Defer so the opening click doesn't immediately close
     const timer = window.setTimeout(() => {
       document.addEventListener("mousedown", onPointerDown);
     }, 0);
@@ -101,6 +114,8 @@ export function VoiceMenu({ className = "", iconClassName = "" }: VoiceMenuProps
 
   useEffect(() => () => clearCloseTimer(), []);
 
+  const muted = !settings.narration && !settings.soundEffects;
+
   const menu =
     open && mounted
       ? createPortal(
@@ -108,49 +123,22 @@ export function VoiceMenu({ className = "", iconClassName = "" }: VoiceMenuProps
             ref={menuRef}
             id={menuId}
             role="dialog"
-            aria-label="Voice settings"
-            className="fixed z-[100] w-[250px] rounded-2xl bg-white p-3 shadow-[0_8px_28px_rgba(0,0,0,0.12)] ring-1 ring-black/5"
+            aria-label="Sound settings"
+            className="fixed z-[200] w-[220px] rounded-2xl bg-white p-3 shadow-[0_10px_30px_rgba(0,0,0,0.14)] ring-1 ring-black/5"
             style={{ top: coords.top, left: coords.left }}
-            onMouseEnter={() => {
-              clearCloseTimer();
-              setOpen(true);
-            }}
+            onMouseEnter={openMenu}
             onMouseLeave={scheduleClose}
           >
-            <div className="flex items-center justify-between gap-3 px-1 py-2">
-              <span className="text-sm font-bold text-[#777]">Narration</span>
+            <div className="flex items-center justify-between gap-3 px-1 py-2.5">
+              <span className="text-[15px] font-bold text-[#777]">Narration</span>
               <Toggle
                 checked={settings.narration}
                 onChange={(narration) => setSettings((s) => ({ ...s, narration }))}
                 label="Narration"
               />
             </div>
-
-            <div className="flex items-center justify-between gap-3 px-1 py-2">
-              <span className="text-sm font-bold text-[#777]">Voice</span>
-              <div className="flex rounded-full bg-[#efefef] p-0.5">
-                {(["melodic", "deep"] as const).map((voice) => {
-                  const selected = settings.voice === voice;
-                  return (
-                    <button
-                      key={voice}
-                      type="button"
-                      onClick={() => setSettings((s) => ({ ...s, voice }))}
-                      className={`rounded-full px-3 py-1 text-xs font-extrabold capitalize transition ${
-                        selected
-                          ? "bg-white text-[var(--ink)] shadow-[0_1px_3px_rgba(0,0,0,0.12)]"
-                          : "text-[#999]"
-                      }`}
-                    >
-                      {voice === "melodic" ? "Melodic" : "Deep"}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between gap-3 px-1 py-2">
-              <span className="text-sm font-bold text-[#777]">Sound effects</span>
+            <div className="flex items-center justify-between gap-3 px-1 py-2.5">
+              <span className="text-[15px] font-bold text-[#777]">Sound effects</span>
               <Toggle
                 checked={settings.soundEffects}
                 onChange={(soundEffects) =>
@@ -165,31 +153,36 @@ export function VoiceMenu({ className = "", iconClassName = "" }: VoiceMenuProps
       : null;
 
   return (
-    <div className={`relative inline-flex ${className}`}>
+    <div
+      className={`relative inline-flex ${className}`}
+      onMouseEnter={openMenu}
+      onMouseLeave={scheduleClose}
+    >
       <button
         ref={buttonRef}
         type="button"
-        aria-label="Voice settings"
+        aria-label="Sound settings"
         aria-expanded={open}
         aria-controls={menuId}
-        onMouseEnter={() => {
-          clearCloseTimer();
-          updatePosition();
-          setOpen(true);
-        }}
-        onMouseLeave={scheduleClose}
+        onFocus={openMenu}
         onClick={() => {
-          clearCloseTimer();
-          updatePosition();
-          setOpen((value) => !value);
+          if (open) {
+            setOpen(false);
+          } else {
+            openMenu();
+          }
         }}
-        className={`grid h-9 w-9 place-items-center rounded-full text-[#afafaf] transition hover:bg-[var(--surface)] hover:text-[var(--ink)] ${
-          open ? "bg-[var(--surface)] text-[var(--sky)] ring-2 ring-[#a4e5ff]" : ""
+        className={`grid h-9 w-9 place-items-center rounded-full text-[#afafaf] transition hover:bg-white hover:text-[var(--ink)] ${
+          open ? "bg-white text-[var(--ink)]" : ""
         } ${iconClassName}`}
       >
         <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M11 5L6 9H3v6h3l5 4V5z" strokeLinejoin="round" />
-          <path d="M15.5 8.5a4 4 0 010 7" strokeLinecap="round" />
+          {muted || !settings.narration ? (
+            <path d="M16 9l5 5M21 9l-5 5" strokeLinecap="round" />
+          ) : (
+            <path d="M15.5 8.5a4 4 0 010 7" strokeLinecap="round" />
+          )}
         </svg>
       </button>
       {menu}
@@ -213,8 +206,8 @@ function Toggle({
       aria-checked={checked}
       aria-label={label}
       onClick={() => onChange(!checked)}
-      className={`relative h-7 w-12 rounded-full transition ${
-        checked ? "bg-[var(--brand)]" : "bg-[#d4d4d4]"
+      className={`relative h-7 w-12 shrink-0 rounded-full transition ${
+        checked ? "bg-[var(--brand)]" : "bg-[#e5e5e5]"
       }`}
     >
       <span

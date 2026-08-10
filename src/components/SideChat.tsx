@@ -63,8 +63,9 @@ function SideChatPanel({
   question,
   checked,
   isCorrect,
+  onClose,
   className = "",
-}: Omit<SideChatProps, "open" | "onClose">) {
+}: Omit<SideChatProps, "open">) {
   const [messages, setMessages] = useState<ChatMessage[]>(() =>
     starterMessages(question),
   );
@@ -127,18 +128,30 @@ function SideChatPanel({
     <aside
       className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#f7f7f7] ${className}`}
     >
-      <div className="flex items-start px-2 pt-3">
+      <div className="flex items-start justify-between px-2 pt-3">
         <div className="flex flex-col">
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Hide side chat"
+              className="grid h-9 w-9 place-items-center rounded-full text-[#c4c4c4] transition hover:bg-white hover:text-[var(--ink)]"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
+              </svg>
+            </button>
+          )}
           <button
             type="button"
             aria-label="Flag question"
-            className="grid h-9 w-9 place-items-center rounded-full text-[#c4c4c4] hover:bg-[var(--surface)] hover:text-[var(--muted)]"
+            className="grid h-9 w-9 place-items-center rounded-full text-[#c4c4c4] hover:bg-white hover:text-[var(--muted)]"
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M5 21V4h10l-1.5 4L19 12H5" strokeLinejoin="round" />
             </svg>
           </button>
-          <VoiceMenu iconClassName="hover:bg-[var(--surface)]" />
+          <VoiceMenu iconClassName="hover:bg-white" />
         </div>
       </div>
 
@@ -236,6 +249,7 @@ export function SideChat({
   checked,
   isCorrect,
   open,
+  onClose,
   className = "",
 }: SideChatProps) {
   if (!open) return null;
@@ -246,6 +260,7 @@ export function SideChat({
       question={question}
       checked={checked}
       isCorrect={isCorrect}
+      onClose={onClose}
       className={className}
     />
   );
