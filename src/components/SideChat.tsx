@@ -55,7 +55,7 @@ function tutorReply(
   if (q.includes("eliminate") || q.includes("wrong")) {
     return "Cross out options that are off-topic or only partially true.";
   }
-  return `Ask for a hint, why an answer works, or how to eliminate choices.`;
+  return "Ask for a hint, why an answer works, or how to eliminate choices.";
 }
 
 function SideChatPanel({
@@ -93,8 +93,8 @@ function SideChatPanel({
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  function pushExchange(text: string) {
-    const trimmed = text.trim();
+  function send() {
+    const trimmed = draft.trim();
     if (!trimmed) return;
     setMessages((prev) => [
       ...prev,
@@ -105,10 +105,6 @@ function SideChatPanel({
         text: tutorReply(trimmed, question, checked),
       },
     ]);
-  }
-
-  function send() {
-    pushExchange(draft);
     setDraft("");
   }
 
@@ -116,35 +112,26 @@ function SideChatPanel({
 
   return (
     <aside
-      className={`relative flex h-full min-h-0 w-full flex-col bg-[#f7f7f7] ${className}`}
+      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#f7f7f7] ${className}`}
     >
-      {/* Drag/resize handle cue */}
-      <span
-        aria-hidden
-        className="absolute top-1/2 right-0 z-10 hidden h-12 w-1.5 -translate-y-1/2 translate-x-1/2 rounded-full bg-[#d4d4d4] lg:block"
-      />
-
-      {/* Top tools — Duolingo-style stacked icons */}
-      <div className="flex items-start justify-between px-3 pt-3">
-        <div className="flex flex-col gap-1">
-          {onClose ? (
+      <div className="flex items-start gap-1 px-2 pt-3">
+        <div className="flex flex-col">
+          {onClose && (
             <button
               type="button"
               onClick={onClose}
               aria-label="Close chat"
-              className="grid h-9 w-9 place-items-center rounded-xl text-[#afafaf] transition hover:bg-white"
+              className="grid h-9 w-9 place-items-center rounded-xl text-[#afafaf] hover:bg-white"
             >
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.4">
                 <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
               </svg>
             </button>
-          ) : (
-            <span className="h-2" />
           )}
           <button
             type="button"
             aria-label="Flag question"
-            className="grid h-9 w-9 place-items-center rounded-full text-[#afafaf] transition hover:bg-white"
+            className="grid h-9 w-9 place-items-center rounded-full text-[#afafaf] hover:bg-white"
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M5 21V4h10l-1.5 4L19 12H5" strokeLinejoin="round" />
@@ -153,7 +140,7 @@ function SideChatPanel({
           <button
             type="button"
             aria-label="Read aloud"
-            className="grid h-9 w-9 place-items-center rounded-full text-[#afafaf] transition hover:bg-white"
+            className="grid h-9 w-9 place-items-center rounded-full text-[#afafaf] hover:bg-white"
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M11 5L6 9H3v6h3l5 4V5z" strokeLinejoin="round" />
@@ -161,23 +148,9 @@ function SideChatPanel({
             </svg>
           </button>
         </div>
-
-        <div className="flex flex-wrap justify-end gap-1.5 pt-1">
-          {["Hint", "Why?", "Eliminate"].map((label) => (
-            <button
-              key={label}
-              type="button"
-              onClick={() => pushExchange(label)}
-              className="rounded-full bg-white px-2.5 py-1 text-[11px] font-extrabold text-[#777] shadow-[0_1px_0_#e5e5e5] transition hover:text-[var(--ink)]"
-            >
-              {label}
-            </button>
-          ))}
-        </div>
       </div>
 
-      {/* Messages — older faded, latest clear */}
-      <div className="flex flex-1 flex-col gap-2.5 overflow-y-auto px-4 py-4">
+      <div className="flex flex-1 flex-col gap-2.5 overflow-y-auto px-4 py-3">
         {messages.map((message, i) => {
           const isLatest = i === lastIndex;
           const isUser = message.role === "user";
@@ -187,12 +160,12 @@ function SideChatPanel({
               className={`flex ${isUser ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[95%] rounded-2xl px-3.5 py-2.5 text-[15px] font-semibold leading-snug transition ${
+                className={`max-w-[95%] rounded-2xl px-3.5 py-2.5 text-[15px] font-semibold leading-snug ${
                   isUser
                     ? "bg-[#1cb0f6] text-white"
                     : isLatest
-                      ? "border border-[#a4e5ff] bg-[#e8f8ff] text-[var(--ink)]"
-                      : "border border-transparent bg-transparent text-[#b0b0b0]"
+                      ? "border border-[#bfe9ff] bg-[#eaf7ff] text-[var(--ink)]"
+                      : "text-[#b4b4b4]"
                 }`}
               >
                 {message.text}
@@ -203,7 +176,6 @@ function SideChatPanel({
         <div ref={bottomRef} />
       </div>
 
-      {/* Pill input + mascot */}
       <div className="px-3 pb-3 pt-1">
         <form
           className="flex items-center gap-2"
@@ -218,7 +190,7 @@ function SideChatPanel({
           >
             <span className="h-3.5 w-3.5 rounded-sm bg-[var(--ink)]" />
           </span>
-          <div className="flex min-h-12 flex-1 items-center gap-2 rounded-full bg-white px-4 shadow-[0_0_0_2px_#e5e5e5]">
+          <div className="flex min-h-12 flex-1 items-center gap-2 rounded-full bg-white px-4 shadow-[0_0_0_1.5px_#e5e5e5]">
             <input
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
@@ -228,7 +200,7 @@ function SideChatPanel({
             <button
               type="button"
               aria-label="Voice input"
-              className="grid h-8 w-8 shrink-0 place-items-center text-[#afafaf] transition hover:text-[var(--ink)]"
+              className="grid h-8 w-8 shrink-0 place-items-center text-[#afafaf]"
             >
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="9" y="3" width="6" height="11" rx="3" />
