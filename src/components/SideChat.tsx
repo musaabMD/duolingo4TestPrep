@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { VoiceMenu } from "@/components/VoiceMenu";
 import type { PracticeQuestion } from "@/lib/types";
 
 export type ChatMessage = {
@@ -137,16 +138,7 @@ function SideChatPanel({
               <path d="M5 21V4h10l-1.5 4L19 12H5" strokeLinejoin="round" />
             </svg>
           </button>
-          <button
-            type="button"
-            aria-label="Read aloud"
-            className="grid h-9 w-9 place-items-center rounded-full text-[#afafaf] hover:bg-white"
-          >
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M11 5L6 9H3v6h3l5 4V5z" strokeLinejoin="round" />
-              <path d="M15.5 8.5a4 4 0 010 7" strokeLinecap="round" />
-            </svg>
-          </button>
+          <VoiceMenu />
         </div>
       </div>
 

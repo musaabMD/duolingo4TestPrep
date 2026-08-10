@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
 import { SideChat } from "@/components/SideChat";
+import { VoiceMenu } from "@/components/VoiceMenu";
 import { useOnboardingStore } from "@/lib/hooks";
 import { questionsForExam } from "@/lib/questions";
 import { addXp, bumpStreak } from "@/lib/storage";
@@ -204,7 +205,7 @@ function PracticeInner() {
         >
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pb-28 pt-5 sm:px-10 sm:pt-8">
             {!chatOpen && (
-              <div className="mb-4 flex gap-1">
+              <div className="mb-4 flex items-center gap-1">
                 <button
                   type="button"
                   aria-label="Flag question"
@@ -214,16 +215,7 @@ function PracticeInner() {
                     <path d="M5 21V4h10l-1.5 4L19 12H5" strokeLinejoin="round" />
                   </svg>
                 </button>
-                <button
-                  type="button"
-                  aria-label="Read aloud"
-                  className="grid h-9 w-9 place-items-center rounded-full text-[#c4c4c4] hover:bg-[var(--surface)]"
-                >
-                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M11 5L6 9H3v6h3l5 4V5z" strokeLinejoin="round" />
-                    <path d="M15.5 8.5a4 4 0 010 7" strokeLinecap="round" />
-                  </svg>
-                </button>
+                <VoiceMenu iconClassName="hover:bg-[var(--surface)]" />
               </div>
             )}
 
