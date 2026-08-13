@@ -33,7 +33,7 @@ function formatDisplay(value: string | null) {
 const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
 export function ExamDatePicker({ value, min, onChange }: ExamDatePickerProps) {
-  const minDate = parseKey(min) ?? new Date();
+  const minDate = useMemo(() => parseKey(min) ?? new Date(), [min]);
   const selected = parseKey(value);
   const initial = selected ?? minDate;
   const [open, setOpen] = useState(true);

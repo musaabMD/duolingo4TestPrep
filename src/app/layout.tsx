@@ -27,7 +27,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${nunito.variable} ${fraunces.variable} h-full`}>
+    <html
+      lang="en"
+      data-scroll-behavior="smooth"
+      className={`${nunito.variable} ${fraunces.variable} h-full`}
+    >
       <body className="min-h-full antialiased">{children}</body>
     </html>
   );

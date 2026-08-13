@@ -83,40 +83,35 @@ body {
 }
 
 .mcq-option {
-  border: 1.5px solid #e8e0e4;
+  border: 2px solid var(--line);
   background: #ffffff;
-  border-radius: 1.25rem;
   transition:
-    border-color 0.14s ease,
-    background 0.14s ease,
-    color 0.14s ease,
-    box-shadow 0.14s ease;
+    border-color 0.12s ease,
+    background 0.12s ease,
+    color 0.12s ease;
 }
 
 .mcq-option:hover:not(:disabled) {
-  border-color: #d4c8cf;
-  background: #fbf8f9;
+  border-color: #c4c4c4;
+  background: #fafafa;
 }
 
 .mcq-option[data-selected="true"] {
-  border-color: #7ec8e8;
-  background: #eef7fb;
-  color: #2a7a9b;
-  box-shadow: 0 0 0 3px rgba(28, 176, 246, 0.12);
+  border-color: var(--sky);
+  background: #ddf4ff;
+  color: #1899d6;
 }
 
 .mcq-option[data-state="correct"] {
-  border-color: #58cc02;
-  background: #f2fbe8;
-  color: #3d7a00;
-  box-shadow: 0 0 0 3px rgba(88, 204, 2, 0.12);
+  border-color: #23966f;
+  background: #e8f5f0;
+  color: #147657;
 }
 
 .mcq-option[data-state="wrong"] {
-  border-color: #ff6b7a;
-  background: #fff2f3;
-  color: #c43b48;
-  box-shadow: 0 0 0 3px rgba(255, 75, 75, 0.1);
+  border-color: #d9565b;
+  background: #fbecee;
+  color: #b83b42;
 }
 
 .sr-only {

@@ -1,130 +1,68 @@
+"use client";
+
 import Link from "next/link";
-import { SearchBox } from "@/components/SearchBox";
+import { useState } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { EXAMS } from "@/lib/exams";
+import type { ExamId } from "@/lib/types";
+
+const EXAM_STYLES: Record<ExamId, string> = {
+  sat: "bg-[#eb1748]",
+  act: "bg-[#079b71]",
+  mcat: "bg-[#7c35ef]",
+  usmle: "bg-[#2d66e8]",
+  gre: "bg-[#ff7412]",
+  lsat: "bg-[#117d72]",
+};
 
 export default function HomePage() {
+  const [query, setQuery] = useState("");
+  const normalizedQuery = query.trim().toLowerCase();
+  const visibleExams = EXAMS.filter(
+    (exam) =>
+      !normalizedQuery ||
+      exam.name.toLowerCase().includes(normalizedQuery) ||
+      exam.blurb.toLowerCase().includes(normalizedQuery) ||
+      exam.topics.some((topic) => topic.toLowerCase().includes(normalizedQuery)),
+  );
+
   return (
-    <div className="min-h-dvh w-full bg-white">
+    <div className="min-h-dvh w-full bg-[#f6f7f9]">
       <SiteHeader />
 
-      <main>
-        <section className="mx-auto grid w-full max-w-6xl items-center gap-12 px-5 pb-16 pt-10 sm:px-8 lg:grid-cols-2 lg:px-12 lg:pt-16">
-          <div className="animate-rise">
-            <p className="mb-3 text-5xl font-black tracking-tight text-[var(--ink)] sm:text-7xl">
-              DrKard
-            </p>
-            <h1 className="max-w-xl text-3xl font-extrabold leading-tight tracking-tight text-[var(--ink)] sm:text-5xl">
-              Test prep that feels like a game — not a grind.
-            </h1>
-            <p className="mt-4 max-w-lg text-lg font-semibold text-[var(--muted)] sm:text-xl">
-              Daily MCQ drills for SAT, ACT, MCAT, USMLE, GRE, and LSAT with exam
-              countdown, streaks, and bite-sized practice.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Link
-                href="/onboarding"
-                className="inline-flex min-h-14 items-center justify-center rounded-2xl bg-[var(--brand)] px-8 text-lg font-extrabold text-white shadow-[0_4px_0_var(--brand-deep)]"
-              >
-                Start onboarding
-              </Link>
-              <Link
-                href="/dashboard"
-                className="inline-flex min-h-14 items-center justify-center rounded-2xl border-2 border-[var(--line)] bg-white px-8 text-lg font-extrabold text-[var(--ink)]"
-              >
-                Open dashboard
-              </Link>
-            </div>
-          </div>
-
-          <div className="animate-rise-delay rounded-3xl border-2 border-[var(--line)] bg-[var(--surface)] p-8">
-            <p className="text-sm font-extrabold uppercase tracking-[0.2em] text-[var(--muted)]">
-              Exam countdown
-            </p>
-            <p className="mt-3 text-6xl font-black text-[var(--ink)]">47</p>
-            <p className="text-xl font-extrabold text-[var(--brand-deep)]">
-              days until MCAT
-            </p>
-            <div className="mt-8 grid grid-cols-2 gap-3">
-              <div className="rounded-2xl bg-white p-4 border-2 border-[var(--line)]">
-                <p className="text-xs font-extrabold uppercase text-[var(--muted)]">Streak</p>
-                <p className="text-3xl font-black text-[var(--ink)]">12</p>
-              </div>
-              <div className="rounded-2xl bg-white p-4 border-2 border-[var(--line)]">
-                <p className="text-xs font-extrabold uppercase text-[var(--muted)]">XP</p>
-                <p className="text-3xl font-black text-[var(--ink)]">860</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="w-full border-y border-[var(--line)] bg-white px-5 py-14 sm:px-8">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="text-center text-3xl font-extrabold tracking-tight text-[var(--ink)]">
-              Find your exam or topic
-            </h2>
-            <p className="mx-auto mt-2 max-w-xl text-center font-semibold text-[var(--muted)]">
-              Search practice paths, then set your exam date and remaining days.
-            </p>
-            <div className="mt-6">
-              <SearchBox />
-            </div>
-          </div>
-        </section>
-
-        <section className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 lg:px-12">
-          <h2 className="text-3xl font-extrabold tracking-tight text-[var(--ink)]">
-            Built for high-stakes exams
-          </h2>
-          <p className="mt-2 max-w-2xl font-semibold text-[var(--muted)]">
-            Pick a track. DrKard personalizes daily MCQs around your test date.
+      <main className="mx-auto w-full max-w-6xl px-5 pb-20 pt-10 sm:px-8 lg:px-12 lg:pt-14">
+        <section className="mx-auto max-w-3xl text-center">
+          <h1 className="text-4xl font-black tracking-tight text-[var(--ink)] sm:text-5xl">
+            Choose your exam
+          </h1>
+          <p className="mx-auto mt-3 max-w-xl text-lg font-semibold text-[var(--muted)]">
+            Pick a track and build a daily plan around your test date.
           </p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {EXAMS.map((exam) => (
-              <Link
-                key={exam.id}
-                href={`/onboarding?exam=${exam.id}`}
-                className="rounded-2xl border-2 border-[var(--line)] bg-white p-5 transition hover:border-[var(--brand)]"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-xl font-extrabold text-[var(--ink)]">{exam.name}</h3>
-                  <span className="rounded-full bg-[var(--surface)] px-3 py-1 text-xs font-extrabold text-[var(--muted)]">
-                    {exam.short}
-                  </span>
-                </div>
-                <p className="mt-2 font-semibold text-[var(--muted)]">{exam.blurb}</p>
-                <p className="mt-4 text-sm font-extrabold text-[var(--brand-deep)]">
-                  Start prep →
-                </p>
-              </Link>
-            ))}
+          <div className="mx-auto mt-7 max-w-2xl">
+            <label className="relative block"><span className="sr-only">Filter exams</span><svg viewBox="0 0 24 24" className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--muted)]" fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4" strokeLinecap="round"/></svg><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Filter exams or topics…" className="min-h-14 w-full rounded-full border-2 border-[var(--line)] bg-white pl-14 pr-5 text-base font-semibold outline-none shadow-[0_8px_24px_rgba(15,40,28,0.06)] transition focus:border-[var(--brand)]"/></label>
           </div>
         </section>
 
-        <section className="w-full border-t border-[var(--line)] bg-[var(--surface)] px-5 py-16 sm:px-8">
-          <div className="mx-auto flex w-full max-w-6xl flex-col items-start justify-between gap-8 lg:flex-row lg:items-center lg:px-4">
-            <div>
-              <h2 className="text-3xl font-extrabold tracking-tight text-[var(--ink)] sm:text-4xl">
-                Set your exam date. Watch the clock work for you.
-              </h2>
-              <p className="mt-3 max-w-xl font-semibold text-[var(--muted)]">
-                Onboarding captures your test day, remaining days, daily study
-                goal, and preferred study time.
-              </p>
-            </div>
+        <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Available exams">
+          {visibleExams.map((exam) => (
             <Link
-              href="/onboarding"
-              className="inline-flex min-h-14 shrink-0 items-center justify-center rounded-2xl bg-[var(--brand)] px-8 text-lg font-extrabold text-white shadow-[0_4px_0_var(--brand-deep)]"
+              key={exam.id}
+              href={`/onboarding?exam=${exam.id}&fresh=1&step=date`}
+              className={`group relative min-h-44 overflow-hidden rounded-[1.25rem] p-5 text-white shadow-[0_7px_16px_rgba(21,32,50,0.11)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(21,32,50,0.16)] ${EXAM_STYLES[exam.id]}`}
             >
-              Customize onboarding
+              <h2 className="relative z-10 max-w-[75%] text-2xl font-black leading-tight tracking-tight">
+                {exam.name}
+              </h2>
+              <span
+                aria-hidden
+                className="absolute -bottom-14 -right-9 h-40 w-44 rotate-[-4deg] rounded-[1.25rem] bg-white/95 shadow-[-10px_-10px_28px_rgba(0,0,0,0.08)] transition duration-200 group-hover:-translate-x-1 group-hover:-translate-y-1"
+                style={{ clipPath: "polygon(32% 0, 100% 18%, 100% 100%, 0 100%)" }}
+              />
             </Link>
-          </div>
+          ))}
+          {visibleExams.length === 0 ? <div className="col-span-full rounded-3xl bg-white p-10 text-center"><h2 className="text-2xl font-black">No matching exams</h2><p className="mt-2 font-semibold text-[var(--muted)]">Try a different exam name or topic.</p></div> : null}
         </section>
       </main>
-
-      <footer className="border-t border-[var(--line)] px-5 py-8 text-center text-sm font-semibold text-[var(--muted)] sm:px-8">
-        © {new Date().getFullYear()} DrKard.com — test prep, gamified.
-      </footer>
     </div>
   );
 }

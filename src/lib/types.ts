@@ -14,12 +14,32 @@ export type StudyTime =
   | "night"
   | "flexible";
 
+export type KnowledgeLevel = "beginner" | "intermediate" | "advanced";
+
 export type OnboardingState = {
   examId: ExamId | null;
   examDate: string | null;
+  knowledgeLevel: KnowledgeLevel | null;
   dailyGoal: DailyGoal | null;
   studyTime: StudyTime | null;
   completed: boolean;
+};
+
+export type ReviewRecord = {
+  questionId: string;
+  examId: ExamId;
+  selectedIndex: number;
+  correct: boolean;
+  flagged: boolean;
+  answeredAt: string;
+};
+
+export type QuestionReport = {
+  questionId: string;
+  examId: ExamId;
+  reason: string;
+  note: string;
+  reportedAt: string;
 };
 
 export type ExamOption = {

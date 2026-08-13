@@ -4,252 +4,114 @@ import { useEffect, useRef, useState } from "react";
 import { VoiceMenu } from "@/components/VoiceMenu";
 import type { PracticeQuestion } from "@/lib/types";
 
-export type ChatMessage = {
-  id: string;
-  role: "tutor" | "user";
-  text: string;
-};
+export type ChatMessage = { id: string; role: "tutor" | "user"; text: string };
 
 type SideChatProps = {
   question: PracticeQuestion;
   checked: boolean;
   isCorrect: boolean | null;
   open: boolean;
+  flagged?: boolean;
+  onFlag?: () => void;
   onClose?: () => void;
+  quickPrompt?: { id: number; text: string } | null;
   className?: string;
 };
 
 function starterMessages(question: PracticeQuestion): ChatMessage[] {
-  return [
-    {
-      id: `${question.id}-start`,
-      role: "tutor",
-      text: "Alright, let's get started.",
-    },
-    {
-      id: `${question.id}-topic`,
-      role: "tutor",
-      text: `This is a ${question.topic} question. Take your time.`,
-    },
-    {
-      id: `${question.id}-prompt`,
-      role: "tutor",
-      text: "Read each choice carefully, then pick the best answer.",
-    },
-  ];
+  return [{ id: `${question.id}-start`, role: "tutor", text: `Let’s work through this ${question.topic} question. Choose an answer, or ask me for a hint.` }];
 }
 
-function tutorReply(
-  input: string,
-  question: PracticeQuestion,
-  checked: boolean,
-): string {
+function tutorReply(input: string, question: PracticeQuestion, checked: boolean): string {
   const q = input.toLowerCase();
-  if (q.includes("hint") || q.includes("help") || q.includes("stuck")) {
-    return `Hint for ${question.topic}: eliminate choices that don't answer the prompt directly.`;
-  }
-  if (q.includes("why") || q.includes("explain") || q.includes("answer") || q.includes("question")) {
-    return checked
-      ? question.explanation
-      : "Pick an answer first — then I can walk through it with you.";
-  }
-  if (q.includes("eliminate") || q.includes("wrong") || q.includes("deeper") || q.includes("simplify")) {
-    return "Cross out options that are off-topic or only partially true.";
-  }
-  return "Ask for a hint, why an answer works, or how to eliminate choices.";
+  if (q.includes("simpl")) return `In simpler terms: ${question.explanation}`;
+  if (q.includes("deeper")) return `${question.explanation} Focus on the exact variable or claim the prompt asks you to identify.`;
+  if (q.includes("hint") || q.includes("question") || q.includes("help") || q.includes("stuck")) return `Hint: eliminate choices that do not directly answer the ${question.topic} prompt.`;
+  if (q.includes("why") || q.includes("explain") || q.includes("answer")) return checked ? question.explanation : "Choose an answer first, then I’ll explain the reasoning.";
+  if (q.includes("eliminate") || q.includes("wrong")) return "Remove options that are off-topic or only partly true, then compare the remaining choices to the wording of the prompt.";
+  return "Ask for a hint, a simpler explanation, or a deeper walkthrough.";
 }
 
-function SideChatPanel({
-  question,
-  checked,
-  isCorrect,
-  onClose,
-  className = "",
-}: Omit<SideChatProps, "open">) {
-  const [messages, setMessages] = useState<ChatMessage[]>(() =>
-    starterMessages(question),
-  );
+function SideChatPanel({ question, checked, isCorrect, flagged = false, onFlag, onClose, quickPrompt, className = "" }: Omit<SideChatProps, "open">) {
+  const [messages, setMessages] = useState<ChatMessage[]>(() => starterMessages(question));
   const [draft, setDraft] = useState("");
   const [typing, setTyping] = useState(false);
+  const [showJump, setShowJump] = useState(false);
+  const viewportRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const pinnedRef = useRef(true);
   const lastResultKey = useRef<string | null>(null);
+  const lastPromptId = useRef<number | null>(null);
+  const appendExchangeRef = useRef<(text: string) => void>(() => undefined);
+
+  function appendExchange(text: string) {
+    if (!text.trim() || typing) return;
+    setMessages((prev) => [...prev, { id: `user-${Date.now()}`, role: "user", text }]);
+    setDraft("");
+    setTyping(true);
+    window.setTimeout(() => {
+      setTyping(false);
+      setMessages((prev) => [...prev, { id: `tutor-${Date.now()}`, role: "tutor", text: tutorReply(text, question, checked) }]);
+    }, 360);
+  }
+  useEffect(() => {
+    appendExchangeRef.current = appendExchange;
+  });
 
   useEffect(() => {
     if (!checked || isCorrect === null) return;
     const key = `${question.id}-${isCorrect}`;
     if (lastResultKey.current === key) return;
     lastResultKey.current = key;
-    const text = isCorrect
-      ? `Nice — that's right. ${question.explanation}`
-      : `Not quite. ${question.explanation}`;
-    setTyping(true);
-    const id = window.setTimeout(() => {
-      setTyping(false);
-      setMessages((prev) => [
-        ...prev,
-        { id: `${key}-${Date.now()}`, role: "tutor", text },
-      ]);
-    }, 450);
-    return () => window.clearTimeout(id);
+    setMessages((prev) => [...prev, { id: key, role: "tutor", text: isCorrect ? `Correct. ${question.explanation}` : `That answer is incorrect. ${question.explanation}` }]);
   }, [checked, isCorrect, question.explanation, question.id]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (!quickPrompt || quickPrompt.id === lastPromptId.current) return;
+    lastPromptId.current = quickPrompt.id;
+    appendExchangeRef.current(quickPrompt.text);
+  }, [quickPrompt]);
+
+  useEffect(() => {
+    if (pinnedRef.current) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    else setShowJump(true);
   }, [messages, typing]);
 
-  function send(preset?: string) {
-    const trimmed = (preset ?? draft).trim();
-    if (!trimmed || typing) return;
-    setMessages((prev) => [
-      ...prev,
-      { id: `user-${Date.now()}`, role: "user", text: trimmed },
-    ]);
-    setDraft("");
-    setTyping(true);
-    window.setTimeout(() => {
-      setTyping(false);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `tutor-${Date.now()}`,
-          role: "tutor",
-          text: tutorReply(trimmed, question, checked),
-        },
-      ]);
-    }, 500);
+  function handleScroll() {
+    const node = viewportRef.current;
+    if (!node) return;
+    const pinned = node.scrollHeight - node.scrollTop - node.clientHeight < 48;
+    pinnedRef.current = pinned;
+    setShowJump(!pinned);
   }
 
   return (
-    <aside
-      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[1.75rem] border border-[#eadfe6] bg-white/90 shadow-[0_8px_30px_rgba(60,40,50,0.06)] backdrop-blur ${className}`}
-    >
-      <div className="flex items-center justify-between gap-2 border-b border-[#f0e8ec] px-4 py-3">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-extrabold text-[var(--ink)]">Tutor</h2>
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#eaf8df] px-2 py-0.5 text-[11px] font-extrabold text-[var(--brand-deep)]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--brand)]" />
-              Ready
-            </span>
-          </div>
+    <aside className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[1.75rem] border-2 border-[var(--line)] bg-white shadow-[0_10px_30px_rgba(21,32,50,0.07)] ${className}`}>
+      <header className="flex h-17 shrink-0 items-center justify-between bg-[var(--surface)] px-4">
+        <div className="flex items-center gap-2.5"><span className="grid h-10 w-10 place-items-center rounded-2xl bg-[var(--ink)] text-sm font-black text-white">Dk</span><div><p className="font-black text-[var(--ink)]">Tutor</p><p className="flex items-center gap-1.5 text-xs font-bold text-[#16865f]"><span className="h-2 w-2 rounded-full bg-[#22a875]"/>Ready</p></div></div>
+        <div className="flex items-center gap-1">
+          {onFlag ? <button type="button" onClick={onFlag} aria-label={flagged ? "Remove flag" : "Flag question"} aria-pressed={flagged} className={`grid h-9 w-9 place-items-center rounded-xl transition ${flagged ? "bg-[#fff4d6] text-[#a86700]" : "text-[var(--muted)] hover:bg-[var(--surface)]"}`}><svg viewBox="0 0 24 24" className="h-5 w-5" fill={flagged ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2"><path d="M5 21V4h11l-2 4 4 4H5" strokeLinejoin="round" /></svg></button> : null}
+          <VoiceMenu iconClassName="hover:bg-[var(--surface)]" />
+          {onClose ? <button type="button" onClick={onClose} aria-label="Hide tutor" className="grid h-9 w-9 place-items-center rounded-xl text-[var(--muted)] hover:bg-[var(--surface)]"><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="m8 5 7 7-7 7" strokeLinecap="round" strokeLinejoin="round" /></svg></button> : null}
         </div>
-        <div className="flex items-center gap-0.5">
-          <button
-            type="button"
-            aria-label="Flag question"
-            className="grid h-9 w-9 place-items-center rounded-full text-[#b9b0b5] hover:bg-[#f7f2f4] hover:text-[var(--muted)]"
-          >
-            <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M5 21V4h10l-1.5 4L19 12H5" strokeLinejoin="round" />
-            </svg>
-          </button>
-          <VoiceMenu iconClassName="hover:bg-[#f7f2f4]" />
-          {onClose && (
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Hide side chat"
-              className="grid h-9 w-9 place-items-center rounded-full text-[#b9b0b5] transition hover:bg-[#f7f2f4] hover:text-[var(--ink)]"
-            >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.4">
-                <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
-              </svg>
-            </button>
-          )}
-        </div>
-      </div>
+      </header>
 
-      <div className="flex flex-1 flex-col gap-2.5 overflow-y-auto px-4 py-4">
-        {messages.map((message) => {
-          const isUser = message.role === "user";
-          return (
-            <div
-              key={message.id}
-              className={`flex ${isUser ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`max-w-[92%] rounded-[1.25rem] px-3.5 py-2.5 text-[15px] font-semibold leading-snug ${
-                  isUser
-                    ? "rounded-br-md bg-[#4a4450] text-white"
-                    : "rounded-bl-md bg-[#f3eef1] text-[#5c5560]"
-                }`}
-              >
-                {message.text}
-              </div>
-            </div>
-          );
-        })}
-        {typing && (
-          <div className="flex justify-start">
-            <div
-              aria-label="Tutor is typing"
-              className="rounded-[1.25rem] rounded-bl-md bg-[#f3eef1] px-4 py-3"
-            >
-              <span className="inline-flex gap-1">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#c4bbc2]" />
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#c4bbc2] [animation-delay:150ms]" />
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#c4bbc2] [animation-delay:300ms]" />
-              </span>
-            </div>
-          </div>
-        )}
+      <div ref={viewportRef} onScroll={handleScroll} role="log" aria-relevant="additions" aria-busy={typing} className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 py-5">
+        {messages.map((message) => <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}><div className={`max-w-[92%] rounded-2xl px-4 py-3.5 text-[15px] font-semibold leading-relaxed ${message.role === "user" ? "bg-[var(--ink)] text-white" : "border-2 border-[var(--line)] bg-[var(--surface)] text-[var(--ink)]"}`}>{message.text}</div></div>)}
+        {typing ? <div className="flex justify-start"><div aria-label="Tutor is typing" className="rounded-2xl bg-[var(--surface)] px-4 py-3"><span className="inline-flex gap-1"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#9ca3af]"/><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#9ca3af] [animation-delay:150ms]"/><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#9ca3af] [animation-delay:300ms]"/></span></div></div> : null}
         <div ref={bottomRef} />
       </div>
 
-      <div className="border-t border-[#f0e8ec] px-3 pb-3 pt-2">
-        <form
-          className="flex items-center gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            send();
-          }}
-        >
-          <div className="flex min-h-12 flex-1 items-center gap-2 rounded-full border border-[#eadfe6] bg-[#fbf8f9] px-4">
-            <input
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              placeholder="Ask the tutor…"
-              className="w-full bg-transparent text-[15px] font-semibold text-[var(--ink)] outline-none placeholder:font-medium placeholder:text-[#b0a7ad]"
-            />
-            <button
-              type="submit"
-              aria-label="Send"
-              disabled={!draft.trim()}
-              className={`grid h-8 w-8 shrink-0 place-items-center rounded-full transition ${
-                draft.trim()
-                  ? "bg-[var(--brand)] text-white"
-                  : "bg-[#e8e0e4] text-[#b0a7ad]"
-              }`}
-            >
-              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor">
-                <path d="M12 4l-1.4 1.4 5.6 5.6H4v2h12.2l-5.6 5.6L12 20l8-8-8-8z" />
-              </svg>
-            </button>
-          </div>
-        </form>
-      </div>
+      {showJump ? <button type="button" onClick={() => { pinnedRef.current = true; setShowJump(false); bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }} className="absolute bottom-20 left-1/2 -translate-x-1/2 rounded-full border border-[var(--line)] bg-white px-3 py-2 text-xs font-extrabold shadow-lg">Newest ↓</button> : null}
+
+      <form className="shrink-0 bg-white p-3" onSubmit={(event) => { event.preventDefault(); appendExchange(draft); }}>
+        <div className="flex min-h-12 items-center gap-2 rounded-2xl border-2 border-[var(--line)] bg-white px-3 focus-within:border-[var(--ink)]"><input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Ask the tutor…" className="min-w-0 flex-1 bg-transparent text-[15px] font-semibold outline-none placeholder:text-[#9ca3af]"/><button type="submit" aria-label="Send" disabled={!draft.trim() || typing} className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[var(--ink)] text-white disabled:bg-[#d5d8dc]"><svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m5 12 7-7 7 7M12 5v14" strokeLinecap="round" strokeLinejoin="round" /></svg></button></div>
+      </form>
     </aside>
   );
 }
 
-export function SideChat({
-  question,
-  checked,
-  isCorrect,
-  open,
-  onClose,
-  className = "",
-}: SideChatProps) {
-  if (!open) return null;
-
-  return (
-    <SideChatPanel
-      key={question.id}
-      question={question}
-      checked={checked}
-      isCorrect={isCorrect}
-      onClose={onClose}
-      className={className}
-    />
-  );
+export function SideChat(props: SideChatProps) {
+  if (!props.open) return null;
+  return <SideChatPanel key={props.question.id} {...props} />;
 }

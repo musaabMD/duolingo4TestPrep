@@ -77,7 +77,7 @@ export function SearchBox({
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter" && examHits[0]) {
-              go(`/onboarding?exam=${examHits[0].id}`);
+              go(`/onboarding?exam=${examHits[0].id}&fresh=1&step=date`);
             }
           }}
           placeholder={placeholder}
@@ -98,7 +98,7 @@ export function SearchBox({
                   <button
                     type="button"
                     onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => go(`/onboarding?exam=${exam.id}`)}
+                    onClick={() => go(`/onboarding?exam=${exam.id}&fresh=1&step=date`)}
                     className="flex w-full items-start gap-3 px-4 py-3 text-left transition hover:bg-[var(--mint)]"
                   >
                     <span className="mt-0.5 grid h-9 w-9 place-items-center rounded-xl bg-[var(--brand)] text-sm font-black text-white">
@@ -120,7 +120,7 @@ export function SearchBox({
                   <button
                     type="button"
                     onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => go(`/practice?exam=${question.examId}`)}
+                    onClick={() => go(`/practice?exam=${question.examId}&question=1`)}
                     className="flex w-full flex-col px-4 py-3 text-left transition hover:bg-[var(--mint)]"
                   >
                     <span className="text-xs font-bold uppercase tracking-wide text-[var(--brand)]">

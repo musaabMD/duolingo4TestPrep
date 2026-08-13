@@ -9,7 +9,7 @@ export const QUESTIONS: PracticeQuestion[] = [
     choices: ["4", "6", "5", "18"],
     correctIndex: 1,
     explanation:
-      "Add 7 to both sides: 3x = 18. Divide by 3: x = 6.",
+      "Start with 3x − 7 = 11. Add 7 to both sides to undo the subtraction while keeping the equation balanced: 3x = 18. Then divide both sides by 3 to isolate x, giving x = 6. Check it by substituting 6 into the original equation: 3(6) − 7 = 18 − 7 = 11, so 6 is correct.",
   },
   {
     id: "sat-2",
@@ -25,7 +25,7 @@ export const QUESTIONS: PracticeQuestion[] = [
     ],
     correctIndex: 1,
     explanation:
-      "Direct evidence linking parks to wellbeing supports the claim; costs or history do not.",
+      "The claim is that parks improve community wellbeing, so the strongest support must measure wellbeing directly. Survey data showing lower stress near green spaces provides relevant evidence connecting parks with a positive health outcome. Construction costs, an architect’s biography, and zoning history describe parks but do not show that they improve wellbeing.",
   },
   {
     id: "act-1",
@@ -41,7 +41,7 @@ export const QUESTIONS: PracticeQuestion[] = [
     ],
     correctIndex: 2,
     explanation:
-      "The independent variable is what the researcher changes — light color.",
+      "The independent variable is the factor deliberately changed by the researcher. Here, the researcher compares blue light with red light, so light color is manipulated. Plant height is the dependent variable because it is the measured outcome, while soil type and number of leaves are not the tested condition.",
   },
   {
     id: "mcat-1",
