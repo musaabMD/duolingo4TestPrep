@@ -40,6 +40,8 @@ function PracticeInner() {
   const accuracyPct =
     answeredCount === 0 ? 0 : Math.round((correctCount / answeredCount) * 100);
   const score = correctCount * 10;
+  const progressPct = ((index + (answered ? 1 : 0.35)) / questions.length) * 100;
+  const isLast = index >= questions.length - 1;
 
   function handleSelect(optionIndex: number) {
     if (answered) return;
