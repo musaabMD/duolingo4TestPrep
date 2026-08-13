@@ -45,7 +45,8 @@ export function ExamSwitcher() {
   }
 
   return (
-    <div className="relative" ref={rootRef}>
+    <div className="flex items-center gap-1 sm:gap-2">
+      <div className="relative" ref={rootRef}>
       <button
         type="button"
         aria-haspopup="menu"
@@ -138,6 +139,7 @@ export function ExamSwitcher() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

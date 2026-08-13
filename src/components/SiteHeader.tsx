@@ -13,8 +13,7 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
         </span>
       </Link>
       <div className="flex items-center gap-1 sm:gap-2">
-        {compact && <ExamSwitcher />}
-        {!compact && (
+        {compact ? <ExamSwitcher /> : (
           <nav className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/dashboard"
