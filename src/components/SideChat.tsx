@@ -29,12 +29,12 @@ function starterMessages(question: PracticeQuestion): ChatMessage[] {
     {
       id: `${question.id}-topic`,
       role: "tutor",
-      text: `This is a ${question.topic} question.`,
+      text: `This is a ${question.topic} question. Take your time.`,
     },
     {
       id: `${question.id}-prompt`,
       role: "tutor",
-      text: "Read the choices carefully, then pick the best answer.",
+      text: "Read each choice carefully, then pick the best answer.",
     },
   ];
 }
@@ -48,12 +48,12 @@ function tutorReply(
   if (q.includes("hint") || q.includes("help") || q.includes("stuck")) {
     return `Hint for ${question.topic}: eliminate choices that don't answer the prompt directly.`;
   }
-  if (q.includes("why") || q.includes("explain") || q.includes("answer")) {
+  if (q.includes("why") || q.includes("explain") || q.includes("answer") || q.includes("question")) {
     return checked
       ? question.explanation
-      : "Pick an answer first — then I can explain.";
+      : "Pick an answer first — then I can walk through it with you.";
   }
-  if (q.includes("eliminate") || q.includes("wrong")) {
+  if (q.includes("eliminate") || q.includes("wrong") || q.includes("deeper") || q.includes("simplify")) {
     return "Cross out options that are off-topic or only partially true.";
   }
   return "Ask for a hint, why an answer works, or how to eliminate choices.";
@@ -80,7 +80,7 @@ function SideChatPanel({
     if (lastResultKey.current === key) return;
     lastResultKey.current = key;
     const text = isCorrect
-      ? `Correct! ${question.explanation}`
+      ? `Nice — that's right. ${question.explanation}`
       : `Not quite. ${question.explanation}`;
     setTyping(true);
     const id = window.setTimeout(() => {
@@ -97,8 +97,8 @@ function SideChatPanel({
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, typing]);
 
-  function send() {
-    const trimmed = draft.trim();
+  function send(preset?: string) {
+    const trimmed = (preset ?? draft).trim();
     if (!trimmed || typing) return;
     setMessages((prev) => [
       ...prev,
@@ -119,58 +119,59 @@ function SideChatPanel({
     }, 500);
   }
 
-  const lastTutorIndex = messages.reduce(
-    (acc, message, i) => (message.role === "tutor" ? i : acc),
-    -1,
-  );
-
   return (
     <aside
-      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-[#f7f7f7] ${className}`}
+      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-[1.75rem] border border-[#eadfe6] bg-white/90 shadow-[0_8px_30px_rgba(60,40,50,0.06)] backdrop-blur ${className}`}
     >
-      <div className="flex items-start justify-between px-2 pt-3">
-        <div className="flex flex-col">
+      <div className="flex items-center justify-between gap-2 border-b border-[#f0e8ec] px-4 py-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-extrabold text-[var(--ink)]">Tutor</h2>
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#eaf8df] px-2 py-0.5 text-[11px] font-extrabold text-[var(--brand-deep)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--brand)]" />
+              Ready
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center gap-0.5">
+          <button
+            type="button"
+            aria-label="Flag question"
+            className="grid h-9 w-9 place-items-center rounded-full text-[#b9b0b5] hover:bg-[#f7f2f4] hover:text-[var(--muted)]"
+          >
+            <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M5 21V4h10l-1.5 4L19 12H5" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <VoiceMenu iconClassName="hover:bg-[#f7f2f4]" />
           {onClose && (
             <button
               type="button"
               onClick={onClose}
               aria-label="Hide side chat"
-              className="grid h-9 w-9 place-items-center rounded-full text-[#c4c4c4] transition hover:bg-white hover:text-[var(--ink)]"
+              className="grid h-9 w-9 place-items-center rounded-full text-[#b9b0b5] transition hover:bg-[#f7f2f4] hover:text-[var(--ink)]"
             >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.4">
                 <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
               </svg>
             </button>
           )}
-          <button
-            type="button"
-            aria-label="Flag question"
-            className="grid h-9 w-9 place-items-center rounded-full text-[#c4c4c4] hover:bg-white hover:text-[var(--muted)]"
-          >
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M5 21V4h10l-1.5 4L19 12H5" strokeLinejoin="round" />
-            </svg>
-          </button>
-          <VoiceMenu iconClassName="hover:bg-white" />
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-2.5 overflow-y-auto px-4 py-3">
-        {messages.map((message, i) => {
+      <div className="flex flex-1 flex-col gap-2.5 overflow-y-auto px-4 py-4">
+        {messages.map((message) => {
           const isUser = message.role === "user";
-          const isActiveTutor = !isUser && i === lastTutorIndex && !typing;
           return (
             <div
               key={message.id}
               className={`flex ${isUser ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[92%] rounded-[18px] border px-3.5 py-2.5 text-[15px] font-semibold leading-snug ${
+                className={`max-w-[92%] rounded-[1.25rem] px-3.5 py-2.5 text-[15px] font-semibold leading-snug ${
                   isUser
-                    ? "border-[#e5e5e5] bg-white text-[#afafaf]"
-                    : isActiveTutor
-                      ? "border-[#d7eef8] bg-[#eef7fb] text-[var(--ink)]"
-                      : "border-[#e5e5e5] bg-white text-[#afafaf]"
+                    ? "rounded-br-md bg-[#4a4450] text-white"
+                    : "rounded-bl-md bg-[#f3eef1] text-[#5c5560]"
                 }`}
               >
                 {message.text}
@@ -182,12 +183,12 @@ function SideChatPanel({
           <div className="flex justify-start">
             <div
               aria-label="Tutor is typing"
-              className="rounded-[18px] border border-[#e5e5e5] bg-white px-4 py-3 text-[#afafaf]"
+              className="rounded-[1.25rem] rounded-bl-md bg-[#f3eef1] px-4 py-3"
             >
               <span className="inline-flex gap-1">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#c4c4c4]" />
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#c4c4c4] [animation-delay:150ms]" />
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#c4c4c4] [animation-delay:300ms]" />
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#c4bbc2]" />
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#c4bbc2] [animation-delay:150ms]" />
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#c4bbc2] [animation-delay:300ms]" />
               </span>
             </div>
           </div>
@@ -195,7 +196,7 @@ function SideChatPanel({
         <div ref={bottomRef} />
       </div>
 
-      <div className="px-3 pb-3 pt-1">
+      <div className="border-t border-[#f0e8ec] px-3 pb-3 pt-2">
         <form
           className="flex items-center gap-2"
           onSubmit={(e) => {
@@ -203,40 +204,27 @@ function SideChatPanel({
             send();
           }}
         >
-          <span
-            aria-hidden
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] bg-[var(--brand)] shadow-[0_3px_0_var(--brand-deep)]"
-          >
-            <span className="text-xl font-black leading-none text-white">D</span>
-          </span>
-          <div className="flex min-h-12 flex-1 items-center gap-2 rounded-full bg-white px-4 shadow-[0_0_0_1.5px_#e5e5e5]">
+          <div className="flex min-h-12 flex-1 items-center gap-2 rounded-full border border-[#eadfe6] bg-[#fbf8f9] px-4">
             <input
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder="How can I help?"
-              className="w-full bg-transparent text-[15px] font-semibold text-[var(--ink)] outline-none placeholder:font-medium placeholder:text-[#afafaf]"
+              placeholder="Ask the tutor…"
+              className="w-full bg-transparent text-[15px] font-semibold text-[var(--ink)] outline-none placeholder:font-medium placeholder:text-[#b0a7ad]"
             />
             <button
-              type="button"
-              aria-label="Voice input"
-              className="grid h-8 w-8 shrink-0 place-items-center text-[#afafaf]"
+              type="submit"
+              aria-label="Send"
+              disabled={!draft.trim()}
+              className={`grid h-8 w-8 shrink-0 place-items-center rounded-full transition ${
+                draft.trim()
+                  ? "bg-[var(--brand)] text-white"
+                  : "bg-[#e8e0e4] text-[#b0a7ad]"
+              }`}
             >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="9" y="3" width="6" height="11" rx="3" />
-                <path d="M5 11a7 7 0 0014 0M12 18v3" strokeLinecap="round" />
+              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor">
+                <path d="M12 4l-1.4 1.4 5.6 5.6H4v2h12.2l-5.6 5.6L12 20l8-8-8-8z" />
               </svg>
             </button>
-            {draft.trim() && (
-              <button
-                type="submit"
-                aria-label="Send"
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--brand)] text-white"
-              >
-                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor">
-                  <path d="M3 11.5L21 3l-7.5 18-2.2-7.3L3 11.5z" />
-                </svg>
-              </button>
-            )}
           </div>
         </form>
       </div>

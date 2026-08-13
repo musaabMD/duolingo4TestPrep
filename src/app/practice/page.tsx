@@ -21,7 +21,6 @@ function PracticeInner() {
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [showWhy, setShowWhy] = useState(false);
-  // Open by default so tutor chat is visible beside the question
   const [chatOpen, setChatOpen] = useState(true);
   const [done, setDone] = useState(false);
   const [earnedXp, setEarnedXp] = useState(0);
@@ -38,7 +37,6 @@ function PracticeInner() {
     return answers[i] === item.correctIndex ? count + 1 : count;
   }, 0);
   const progressPct = ((index + (answered ? 1 : 0.35)) / questions.length) * 100;
-  const remainingDots = Math.max(0, questions.length - index - 1);
   const isLast = index >= questions.length - 1;
 
   function handleSelect(optionIndex: number) {
@@ -70,7 +68,7 @@ function PracticeInner() {
 
   if (done) {
     return (
-      <div className="flex min-h-dvh w-full flex-col bg-[#f7f7f7]">
+      <div className="flex min-h-dvh w-full flex-col bg-[linear-gradient(180deg,#f7f3f5_0%,#f0f6ef_100%)]">
         <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center px-6 text-center">
           <div className="animate-float mb-8 grid h-28 w-28 place-items-center rounded-[2rem] bg-[#ce82ff]">
             <div className="h-14 w-5 rounded-full bg-white" />
@@ -92,7 +90,7 @@ function PracticeInner() {
             </p>
           </div>
         </div>
-        <div className="border-t border-[var(--line)] bg-white px-6 py-5">
+        <div className="border-t border-[#eadfe6] bg-white/90 px-6 py-5 backdrop-blur">
           <div className="mx-auto flex max-w-3xl justify-center gap-3">
             <button
               type="button"
@@ -101,14 +99,14 @@ function PracticeInner() {
                 setAnswers({});
                 setDone(false);
               }}
-              className="min-h-14 min-w-40 rounded-2xl bg-[var(--surface)] px-8 text-lg font-extrabold"
+              className="min-h-14 min-w-40 rounded-full bg-[#f3eef1] px-8 text-lg font-extrabold"
             >
               Again
             </button>
             <button
               type="button"
               onClick={() => router.push("/dashboard")}
-              className="min-h-14 min-w-56 rounded-2xl bg-[var(--brand)] px-10 text-lg font-extrabold text-white shadow-[0_4px_0_var(--brand-deep)]"
+              className="min-h-14 min-w-56 rounded-full bg-[var(--brand)] px-10 text-lg font-extrabold text-white shadow-[0_4px_0_var(--brand-deep)]"
             >
               Continue
             </button>
@@ -120,39 +118,32 @@ function PracticeInner() {
 
   if (!question) {
     return (
-      <div className="grid min-h-dvh place-items-center bg-[#f7f7f7] font-bold text-[var(--muted)]">
+      <div className="grid min-h-dvh place-items-center bg-[#f7f3f5] font-bold text-[var(--muted)]">
         Loading practice…
       </div>
     );
   }
 
   return (
-    <div className="flex h-dvh w-full flex-col overflow-hidden bg-[#f7f7f7]">
-      {/* Top bar */}
-      <header className="shrink-0 bg-[#f7f7f7] px-4 py-3 sm:px-6 lg:px-8">
+    <div className="flex h-dvh w-full flex-col overflow-hidden bg-[linear-gradient(165deg,#f8f4f6_0%,#f2f7f0_48%,#f6f1f4_100%)]">
+      <header className="shrink-0 px-4 py-3 sm:px-6 lg:px-8">
         <div className="flex w-full items-center gap-3 sm:gap-4">
           <Link
             href="/dashboard"
             aria-label="Close practice"
-            className="grid h-10 w-10 shrink-0 place-items-center text-[#afafaf] transition hover:text-[var(--ink)]"
+            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[#eadfe6] bg-white/80 px-4 text-sm font-extrabold text-[var(--muted)] shadow-sm backdrop-blur transition hover:text-[var(--ink)]"
           >
-            <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M15 5l-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
+            Back
           </Link>
 
-          <div className="flex flex-1 items-center gap-2">
-            <div className="h-3.5 flex-1 overflow-hidden rounded-full bg-[#e5e5e5]">
-              <div
-                className="h-full rounded-full bg-[var(--brand)] transition-all duration-500"
-                style={{ width: `${Math.min(100, progressPct)}%` }}
-              />
-            </div>
-            <div className="hidden items-center gap-1.5 sm:flex">
-              {Array.from({ length: Math.min(4, remainingDots) }).map((_, i) => (
-                <span key={i} className="h-2.5 w-2.5 rounded-full bg-[#e5e5e5]" />
-              ))}
-            </div>
+          <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-white/70 shadow-inner">
+            <div
+              className="h-full rounded-full bg-[var(--brand)] transition-all duration-500"
+              style={{ width: `${Math.min(100, progressPct)}%` }}
+            />
           </div>
 
           <div className="flex shrink-0 items-center gap-3 text-base font-extrabold">
@@ -162,7 +153,7 @@ function PracticeInner() {
                 <path d="M12 2l2.9 6.3L22 9.3l-5 4.9 1.2 7-6.2-3.3L5.8 21l1.2-7-5-4.9 7.1-1z" />
               </svg>
             </span>
-            <svg viewBox="0 0 24 24" className="h-5 w-5 fill-[var(--amber)]">
+            <svg viewBox="0 0 24 24" className="h-5 w-5 fill-[#ff9600]">
               <path d="M13 2L4 14h7l-1 8 10-14h-7l0-6z" />
             </svg>
             <button
@@ -173,7 +164,7 @@ function PracticeInner() {
               className={`grid h-9 w-9 place-items-center rounded-full transition md:hidden ${
                 chatOpen
                   ? "bg-[#eaf7ff] text-[var(--sky)]"
-                  : "text-[#afafaf] hover:bg-white hover:text-[var(--ink)]"
+                  : "bg-white/80 text-[#afafaf] hover:text-[var(--ink)]"
               }`}
             >
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
@@ -184,42 +175,30 @@ function PracticeInner() {
         </div>
       </header>
 
-      {/* Body: gray chrome + full white question plane */}
-      <div className="relative flex min-h-0 flex-1 gap-0 md:pl-2 md:pr-3 md:pb-3 lg:pr-4">
-        {/* Side chat sits on gray page chrome */}
+      <div className="relative flex min-h-0 flex-1 gap-3 px-3 pb-3 sm:px-5 lg:px-6">
         <div
           className={`relative hidden h-full shrink-0 transition-all duration-300 ease-out md:flex ${
-            chatOpen ? "w-[280px] lg:w-[300px] xl:w-[340px]" : "w-14"
+            chatOpen ? "w-[300px] lg:w-[320px] xl:w-[360px]" : "w-14"
           }`}
         >
           {chatOpen ? (
-            <>
-              <SideChat
-                question={question}
-                checked={answered}
-                isCorrect={answered ? isCorrect : null}
-                open
-                onClose={() => setChatOpen(false)}
-                className="w-full"
-              />
-              <button
-                type="button"
-                aria-label="Close side chat"
-                onClick={() => setChatOpen(false)}
-                className="absolute top-1/2 -right-1.5 z-20 h-10 w-3 -translate-y-1/2 rounded-full bg-[#d9d9d9] hover:bg-[#c4c4c4]"
-              />
-            </>
+            <SideChat
+              question={question}
+              checked={answered}
+              isCorrect={answered ? isCorrect : null}
+              open
+              onClose={() => setChatOpen(false)}
+              className="w-full"
+            />
           ) : (
             <button
               type="button"
               aria-label="Open side chat"
               onClick={() => setChatOpen(true)}
-              className="flex h-full w-full flex-col items-center gap-3 py-5 transition hover:bg-white/50"
+              className="flex h-full w-full flex-col items-center gap-3 rounded-[1.75rem] border border-[#eadfe6] bg-white/80 py-5 shadow-sm backdrop-blur transition hover:bg-white"
             >
               <span className="grid h-10 w-10 place-items-center rounded-2xl bg-[var(--brand)] text-white shadow-[0_3px_0_var(--brand-deep)]">
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.25">
-                  <path d="M5 6h14v10H8l-3 3V6z" strokeLinejoin="round" />
-                </svg>
+                <span className="text-lg font-black">D</span>
               </span>
               <span
                 className="text-xs font-extrabold tracking-wide text-[var(--muted)]"
@@ -231,9 +210,8 @@ function PracticeInner() {
           )}
         </div>
 
-        {/* Full remaining area = white question background */}
-        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white md:rounded-[1.75rem] md:border md:border-[#e5e5e5]">
-          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pb-28 pt-5 sm:px-10 sm:pt-8 lg:px-14">
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-[#eadfe6] bg-white shadow-[0_10px_40px_rgba(60,40,50,0.06)]">
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-5 pb-8 pt-6 sm:px-10 sm:pt-8 lg:px-14">
             {!chatOpen && (
               <div className="mb-4 flex items-center gap-1">
                 <button
@@ -250,14 +228,14 @@ function PracticeInner() {
             )}
 
             <div className="mx-auto w-full max-w-3xl flex-1">
-              <p className="text-center text-sm font-bold uppercase tracking-wide text-[var(--muted)] sm:text-left">
+              <p className="text-sm font-extrabold uppercase tracking-[0.16em] text-[#b0a7ad]">
                 {question.topic}
               </p>
-              <h1 className="mt-3 text-center text-2xl font-extrabold leading-snug tracking-tight text-[var(--ink)] sm:text-left sm:text-3xl">
+              <h1 className="mt-3 text-[1.65rem] font-extrabold leading-snug tracking-tight text-[#3f3a42] sm:text-3xl">
                 {question.prompt}
               </h1>
 
-              <div className="mt-8 space-y-3 sm:mt-10">
+              <div className="mt-8 space-y-3 sm:mt-9">
                 {question.choices.map((choice, i) => {
                   let state: "correct" | "wrong" | undefined;
                   if (answered) {
@@ -273,19 +251,19 @@ function PracticeInner() {
                       data-selected={!answered && selected === i ? "true" : "false"}
                       data-state={state}
                       onClick={() => handleSelect(i)}
-                      className="mcq-option relative flex w-full items-center gap-4 rounded-2xl px-4 py-4 text-left sm:px-5 sm:py-5"
+                      className="mcq-option relative flex w-full items-center gap-4 px-4 py-4 text-left sm:px-5 sm:py-5"
                     >
-                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--surface)] text-sm font-extrabold text-[var(--muted)]">
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#f7f2f4] text-sm font-extrabold text-[#8a8188]">
                         {letter}
                       </span>
                       <span className="flex-1 text-lg font-bold sm:text-xl">{choice}</span>
                       {state === "correct" && (
-                        <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--brand)] text-white">
+                        <span className="grid h-8 w-8 place-items-center rounded-full border-2 border-[var(--brand)] bg-white text-[var(--brand)]">
                           ✓
                         </span>
                       )}
                       {state === "wrong" && (
-                        <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--warn)] text-white">
+                        <span className="grid h-8 w-8 place-items-center rounded-full border-2 border-[#ff6b7a] bg-white text-[#ff6b7a]">
                           ✕
                         </span>
                       )}
@@ -293,64 +271,93 @@ function PracticeInner() {
                   );
                 })}
               </div>
+
+              {answered && (
+                <div className="mt-6 rounded-[1.35rem] border border-[#eadfe6] bg-[#faf7f8] p-5">
+                  <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-[#b0a7ad]">
+                    Explanation
+                  </p>
+                  <p className="mt-2 text-base font-semibold leading-relaxed text-[#5c5560]">
+                    {question.explanation}
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {["I still have questions", "Go deeper", "Simplify"].map((label) => (
+                      <button
+                        key={label}
+                        type="button"
+                        onClick={() => {
+                          setChatOpen(true);
+                          setShowWhy(label === "I still have questions");
+                        }}
+                        className="rounded-full border border-[#eadfe6] bg-white px-3.5 py-2 text-sm font-extrabold text-[#6b646c] transition hover:bg-white"
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          <div
-            className={`shrink-0 border-t px-4 py-4 sm:px-6 ${
-              !answered
-                ? "border-[var(--line)] bg-white"
-                : isCorrect
-                  ? "border-transparent bg-[var(--ok-soft)]"
-                  : "border-transparent bg-[var(--warn-soft)]"
-            }`}
-          >
+          <div className="shrink-0 border-t border-[#f0e8ec] bg-white/95 px-4 py-4 sm:px-6">
             <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3">
-              <div className="flex min-h-10 items-center gap-3">
-                <button
-                  type="button"
-                  aria-label="Back"
-                  disabled={index <= 0}
-                  onClick={handleBack}
-                  className={`grid h-12 w-12 place-items-center rounded-2xl border-2 border-b-4 ${
-                    index <= 0
-                      ? "cursor-not-allowed border-[#e5e5e5] bg-[#f0f0f0] text-[#afafaf]"
-                      : "border-[#e5e5e5] bg-white text-[var(--muted)] hover:bg-[var(--surface)]"
-                  }`}
-                >
-                  <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2.75">
-                    <path d="M15 5l-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-              </div>
+              <button
+                type="button"
+                aria-label="Back"
+                disabled={index <= 0}
+                onClick={handleBack}
+                className={`grid h-12 w-12 place-items-center rounded-full border ${
+                  index <= 0
+                    ? "cursor-not-allowed border-[#eee7eb] bg-[#f7f2f4] text-[#cfc6cc]"
+                    : "border-[#eadfe6] bg-white text-[#6b646c] hover:bg-[#faf7f8]"
+                }`}
+              >
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M15 5l-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
 
               <div className="flex items-center gap-2">
-                {answered && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowWhy(true);
-                      setChatOpen(true);
-                    }}
-                    className="min-h-12 rounded-2xl border-2 border-b-4 border-[#e5e5e5] bg-white px-5 text-base font-extrabold text-[var(--muted)]"
-                  >
-                    Why?
-                  </button>
-                )}
+                <button
+                  type="button"
+                  aria-label={chatOpen ? "Hide tutor" : "Show tutor"}
+                  onClick={() => setChatOpen((v) => !v)}
+                  className={`grid h-12 w-12 place-items-center rounded-full border ${
+                    chatOpen
+                      ? "border-[#cfe9ff] bg-[#eaf7ff] text-[var(--sky)]"
+                      : "border-[#eadfe6] bg-white text-[#6b646c]"
+                  }`}
+                >
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M5 6h14v10H8l-3 3V6z" strokeLinejoin="round" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  aria-label="Why?"
+                  disabled={!answered}
+                  onClick={() => setShowWhy(true)}
+                  className={`grid h-12 w-12 place-items-center rounded-full border ${
+                    answered
+                      ? "border-[#eadfe6] bg-white text-[#6b646c] hover:bg-[#faf7f8]"
+                      : "cursor-not-allowed border-[#eee7eb] bg-[#f7f2f4] text-[#cfc6cc]"
+                  }`}
+                >
+                  <span className="text-lg font-black">?</span>
+                </button>
                 <button
                   type="button"
                   aria-label={isLast ? "Finish" : "Next"}
                   disabled={!answered}
                   onClick={handleNext}
-                  className={`grid h-12 w-12 place-items-center rounded-2xl ${
+                  className={`grid h-12 min-w-14 place-items-center rounded-full px-4 ${
                     !answered
-                      ? "cursor-not-allowed bg-[#e5e5e5] text-[#afafaf]"
-                      : isCorrect
-                        ? "bg-[var(--brand)] text-white shadow-[0_4px_0_var(--brand-deep)]"
-                        : "bg-[var(--warn)] text-white shadow-[0_4px_0_#ea2b2b]"
+                      ? "cursor-not-allowed bg-[#eee7eb] text-[#cfc6cc]"
+                      : "bg-[#ff7a8a] text-white shadow-[0_4px_0_#e85d6d]"
                   }`}
                 >
-                  <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2.75">
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.75">
                     <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
@@ -359,16 +366,15 @@ function PracticeInner() {
           </div>
         </main>
 
-        {/* Mobile chat drawer */}
         {chatOpen && (
-          <div className="absolute inset-0 z-30 flex lg:hidden">
+          <div className="absolute inset-0 z-30 flex md:hidden">
             <button
               type="button"
               className="absolute inset-0 bg-black/25"
               aria-label="Dismiss chat"
               onClick={() => setChatOpen(false)}
             />
-            <div className="relative z-10 h-full w-[min(100%,340px)] overflow-hidden rounded-r-3xl bg-[#f7f7f7] shadow-2xl">
+            <div className="relative z-10 h-full w-[min(100%,360px)] overflow-hidden p-3">
               <SideChat
                 question={question}
                 checked={answered}
@@ -383,8 +389,8 @@ function PracticeInner() {
       </div>
 
       {showWhy && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
-          <div className="animate-rise w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/35 p-4">
+          <div className="animate-rise w-full max-w-lg rounded-[1.75rem] bg-white p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-2xl font-extrabold">Explanation</h2>
               <button
@@ -396,9 +402,9 @@ function PracticeInner() {
                 ✕
               </button>
             </div>
-            <div className="rounded-2xl border-2 border-[var(--line)] p-5">
+            <div className="rounded-[1.25rem] border border-[#eadfe6] bg-[#faf7f8] p-5">
               <p className="font-bold">{question.prompt}</p>
-              <p className="mt-4 inline-flex rounded-2xl bg-[var(--ok-soft)] px-4 py-2 font-extrabold text-[var(--brand-deep)]">
+              <p className="mt-4 inline-flex rounded-full bg-[var(--ok-soft)] px-4 py-2 font-extrabold text-[var(--brand-deep)]">
                 {question.choices[question.correctIndex]}
               </p>
               <p className="mt-4 font-semibold text-[var(--muted)]">{question.explanation}</p>
@@ -406,7 +412,7 @@ function PracticeInner() {
             <button
               type="button"
               onClick={() => setShowWhy(false)}
-              className="mt-5 min-h-14 w-full rounded-2xl bg-[var(--brand)] text-lg font-extrabold text-white shadow-[0_4px_0_var(--brand-deep)]"
+              className="mt-5 min-h-14 w-full rounded-full bg-[var(--brand)] text-lg font-extrabold text-white shadow-[0_4px_0_var(--brand-deep)]"
             >
               Got it
             </button>
@@ -421,7 +427,7 @@ export default function PracticePage() {
   return (
     <Suspense
       fallback={
-        <div className="grid min-h-dvh place-items-center bg-[#f7f7f7] font-bold text-[var(--muted)]">
+        <div className="grid min-h-dvh place-items-center bg-[#f7f3f5] font-bold text-[var(--muted)]">
           Loading practice…
         </div>
       }
