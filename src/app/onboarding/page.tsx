@@ -169,9 +169,14 @@ function OnboardingInner() {
   }
 
   function selectAndAdvance(partial: Partial<OnboardingState>) {
-    patch(partial);
-    setStepIndex((i) => Math.min(STEPS.length - 1, i + 1));
+    const nextState = { ...state, ...partial };
+    setDraft(nextState);
+    saveOnboarding(nextState);
+    // Always move forward on card choice — no Continue needed
+    setStepIndex((current) => Math.min(STEPS.length - 1, current + 1));
   }
+
+  const showContinue = step === "welcome" || step === "date" || step === "ready";
 
   const minDateStr = new Date().toISOString().slice(0, 10);
 
@@ -216,7 +221,7 @@ function OnboardingInner() {
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => patch({ examId: item.id })}
+                    onClick={() => selectAndAdvance({ examId: item.id })}
                     className={`rounded-2xl border-2 p-5 text-left transition ${
                       selected
                         ? "border-[var(--brand)] bg-[var(--ok-soft)]"
@@ -274,7 +279,7 @@ function OnboardingInner() {
         )}
 
         {step === "goal" && (
-          <div className="animate-rise">
+          <div className="animate-rise mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center pb-8">
             <div className="mb-8 flex items-start gap-4">
               <span className="mt-1 grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[var(--brand)] text-base font-black text-white">
                 Dk
@@ -284,33 +289,26 @@ function OnboardingInner() {
               </h1>
             </div>
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-              {GOALS.map((goal) => {
-                const selected = state.dailyGoal === goal.value;
-                return (
-                  <button
-                    key={goal.value}
-                    type="button"
-                    onClick={() => selectAndAdvance({ dailyGoal: goal.value })}
-                    className={`flex min-h-48 flex-col items-center justify-center rounded-2xl border-2 px-3 py-6 transition ${
-                      selected
-                        ? "border-[var(--sky)] bg-[#ddf4ff]"
-                        : "border-[var(--line)] bg-white hover:bg-[var(--surface)]"
-                    }`}
+              {GOALS.map((goal) => (
+                <button
+                  key={goal.value}
+                  type="button"
+                  onClick={() => selectAndAdvance({ dailyGoal: goal.value })}
+                  className="flex min-h-48 flex-col items-center justify-center rounded-2xl border-2 border-[var(--line)] bg-white px-3 py-6 transition hover:border-[var(--sky)] hover:bg-[#ddf4ff]"
+                >
+                  <span
+                    className="mb-4 grid h-20 w-20 place-items-center rounded-full"
+                    style={{
+                      background: `conic-gradient(#1cb0f6 ${goal.fill}%, #e5e5e5 0)`,
+                    }}
                   >
-                    <span
-                      className="mb-4 grid h-20 w-20 place-items-center rounded-full"
-                      style={{
-                        background: `conic-gradient(#1cb0f6 ${goal.fill}%, #e5e5e5 0)`,
-                      }}
-                    >
-                      <span className="grid h-12 w-12 place-items-center rounded-full bg-white text-sm font-black">
-                        {goal.value}
-                      </span>
+                    <span className="grid h-12 w-12 place-items-center rounded-full bg-white text-sm font-black">
+                      {goal.value}
                     </span>
-                    <span className="text-lg font-extrabold">{goal.label}</span>
-                  </button>
-                );
-              })}
+                  </span>
+                  <span className="text-lg font-extrabold">{goal.label}</span>
+                </button>
+              ))}
             </div>
           </div>
         )}
@@ -398,20 +396,22 @@ function OnboardingInner() {
         )}
       </main>
 
-      <footer className="fixed inset-x-0 bottom-0 border-t border-[var(--line)] bg-white px-4 py-5 sm:px-8">
-        <div className="mx-auto flex w-full max-w-6xl justify-end">
-          <PillButton
-            onClick={next}
-            disabled={!canContinue}
-            variant={
-              canContinue ? (step === "ready" ? "brand" : "primary") : "disabled"
-            }
-            className="max-w-xs"
-          >
-            {step === "ready" ? "Go to dashboard" : "Continue"}
-          </PillButton>
-        </div>
-      </footer>
+      {showContinue && (
+        <footer className="fixed inset-x-0 bottom-0 border-t border-[var(--line)] bg-white px-4 py-5 sm:px-8">
+          <div className="mx-auto flex w-full max-w-6xl justify-end">
+            <PillButton
+              onClick={next}
+              disabled={!canContinue}
+              variant={
+                canContinue ? (step === "ready" ? "brand" : "primary") : "disabled"
+              }
+              className="max-w-xs"
+            >
+              {step === "ready" ? "Go to dashboard" : "Continue"}
+            </PillButton>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }
