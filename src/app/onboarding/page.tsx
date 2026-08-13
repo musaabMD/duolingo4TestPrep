@@ -342,13 +342,8 @@ function OnboardingInner() {
                       >
                         <ScheduleIcon name={item.icon} />
                       </span>
-                      <span className="min-w-0">
-                        <span className="block text-lg font-extrabold text-[var(--ink)]">
-                          {item.title}
-                        </span>
-                        <span className="mt-0.5 block text-sm font-semibold text-[var(--muted)]">
-                          {item.subtitle}
-                        </span>
+                      <span className="min-w-0 text-lg font-extrabold text-[var(--ink)]">
+                        {item.title}
                       </span>
                     </span>
                     <span className="shrink-0 text-xl font-bold text-[#c4c4c4]" aria-hidden>
