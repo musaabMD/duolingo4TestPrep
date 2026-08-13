@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ExamSwitcher } from "@/components/ExamSwitcher";
 
 export function SiteHeader({ compact = false }: { compact?: boolean }) {
   return (
@@ -11,22 +12,25 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
           DrKard
         </span>
       </Link>
-      {!compact && (
-        <nav className="flex items-center gap-2 sm:gap-3">
-          <Link
-            href="/dashboard"
-            className="hidden rounded-full px-4 py-2 text-sm font-bold text-[var(--ink)] transition hover:bg-black/5 sm:inline-flex"
-          >
-            Dashboard
-          </Link>
-          <Link
-            href="/onboarding"
-            className="rounded-full bg-[var(--ink)] px-5 py-2.5 text-sm font-extrabold text-white transition hover:bg-black"
-          >
-            Get started
-          </Link>
-        </nav>
-      )}
+      <div className="flex items-center gap-1 sm:gap-2">
+        {compact && <ExamSwitcher />}
+        {!compact && (
+          <nav className="flex items-center gap-2 sm:gap-3">
+            <Link
+              href="/dashboard"
+              className="hidden rounded-full px-4 py-2 text-sm font-bold text-[var(--ink)] transition hover:bg-black/5 sm:inline-flex"
+            >
+              Dashboard
+            </Link>
+            <Link
+              href="/onboarding"
+              className="rounded-full bg-[var(--ink)] px-5 py-2.5 text-sm font-extrabold text-white transition hover:bg-black"
+            >
+              Get started
+            </Link>
+          </nav>
+        )}
+      </div>
     </header>
   );
 }

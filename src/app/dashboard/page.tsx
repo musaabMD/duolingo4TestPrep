@@ -37,12 +37,6 @@ export default function DashboardPage() {
             >
               Continue practice
             </Link>
-            <Link
-              href="/onboarding"
-              className="inline-flex min-h-12 items-center justify-center rounded-2xl border-2 border-[var(--line)] bg-white px-6 text-base font-extrabold text-[var(--ink)]"
-            >
-              {profile.completed ? "Edit plan" : "Start onboarding"}
-            </Link>
           </div>
         </div>
 
