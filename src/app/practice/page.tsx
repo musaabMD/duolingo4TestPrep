@@ -36,8 +36,10 @@ function PracticeInner() {
   const correctCount = questions.reduce((count, item, i) => {
     return answers[i] === item.correctIndex ? count + 1 : count;
   }, 0);
-  const progressPct = ((index + (answered ? 1 : 0.35)) / questions.length) * 100;
-  const isLast = index >= questions.length - 1;
+  const answeredCount = Object.keys(answers).length;
+  const accuracyPct =
+    answeredCount === 0 ? 0 : Math.round((correctCount / answeredCount) * 100);
+  const score = correctCount * 10;
 
   function handleSelect(optionIndex: number) {
     if (answered) return;
@@ -146,16 +148,10 @@ function PracticeInner() {
             />
           </div>
 
-          <div className="flex shrink-0 items-center gap-3 text-base font-extrabold">
-            <span className="flex items-center gap-1 text-[#afafaf]">
-              <span className="text-[var(--ink)]">{correctCount * 10}</span>
-              <svg viewBox="0 0 24 24" className="h-5 w-5 fill-[var(--amber)]">
-                <path d="M12 2l2.9 6.3L22 9.3l-5 4.9 1.2 7-6.2-3.3L5.8 21l1.2-7-5-4.9 7.1-1z" />
-              </svg>
-            </span>
-            <svg viewBox="0 0 24 24" className="h-5 w-5 fill-[#ff9600]">
-              <path d="M13 2L4 14h7l-1 8 10-14h-7l0-6z" />
-            </svg>
+          <div className="flex shrink-0 items-center gap-3 text-base font-extrabold tabular-nums text-[var(--ink)]">
+            <span aria-label={`${accuracyPct} percent`}>{accuracyPct}%</span>
+            <span className="h-4 w-px bg-[#d9d9d9]" aria-hidden />
+            <span aria-label={`Score ${score}`}>{score}</span>
             <button
               type="button"
               onClick={() => setChatOpen((v) => !v)}
@@ -163,7 +159,7 @@ function PracticeInner() {
               aria-pressed={chatOpen}
               className={`grid h-9 w-9 place-items-center rounded-full transition md:hidden ${
                 chatOpen
-                  ? "bg-[#eaf7ff] text-[var(--sky)]"
+                  ? "bg-white text-[var(--ink)]"
                   : "bg-white/80 text-[#afafaf] hover:text-[var(--ink)]"
               }`}
             >
