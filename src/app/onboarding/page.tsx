@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
+import { ExamDatePicker } from "@/components/ExamDatePicker";
 import { PillButton } from "@/components/PillButton";
 import { ProgressBar } from "@/components/ProgressBar";
 import { daysUntil, EXAMS, formatRemaining, getExam } from "@/lib/exams";
@@ -242,18 +243,16 @@ function OnboardingInner() {
               </h1>
             </div>
 
-            <label className="block">
+            <div>
               <span className="mb-2 block text-sm font-extrabold uppercase tracking-wide text-[var(--muted)]">
                 Exam date
               </span>
-              <input
-                type="date"
+              <ExamDatePicker
+                value={state.examDate}
                 min={minDateStr}
-                value={state.examDate ?? ""}
-                onChange={(e) => patch({ examDate: e.target.value || null })}
-                className="w-full rounded-2xl border-2 border-[var(--line)] bg-white px-5 py-4 text-xl font-bold outline-none transition focus:border-[var(--brand)]"
+                onChange={(examDate) => patch({ examDate })}
               />
-            </label>
+            </div>
 
             <div className="mt-6 rounded-3xl border-2 border-[var(--line)] bg-[var(--surface)] p-8">
               <p className="text-sm font-extrabold uppercase tracking-[0.18em] text-[var(--muted)]">
