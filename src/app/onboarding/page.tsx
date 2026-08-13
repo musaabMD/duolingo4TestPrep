@@ -229,7 +229,7 @@ function OnboardingInner() {
                   <button
                     key={goal.value}
                     type="button"
-                    onClick={() => patch({ dailyGoal: goal.value })}
+                    onClick={() => selectAndAdvance({ dailyGoal: goal.value })}
                     className={`flex min-h-48 flex-col items-center justify-center rounded-2xl border-2 px-3 py-6 transition ${
                       selected
                         ? "border-[var(--sky)] bg-[#ddf4ff]"
@@ -271,7 +271,7 @@ function OnboardingInner() {
                   <button
                     key={item.value}
                     type="button"
-                    onClick={() => patch({ studyTime: item.value })}
+                    onClick={() => selectAndAdvance({ studyTime: item.value })}
                     className={`flex min-h-52 flex-col items-center justify-center rounded-2xl border-2 px-4 py-6 text-center transition ${
                       selected
                         ? "border-[var(--sky)] bg-[#ddf4ff]"
