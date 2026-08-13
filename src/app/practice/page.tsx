@@ -125,8 +125,8 @@ function PracticeInner() {
   }
 
   return (
-    <div className="flex h-dvh w-full flex-col overflow-hidden bg-[linear-gradient(165deg,#f8f4f6_0%,#f2f7f0_48%,#f6f1f4_100%)]">
-      <header className="shrink-0 px-4 py-3 sm:px-6 lg:px-8">
+    <div className="flex h-dvh w-full flex-col overflow-hidden bg-[#f7f7f7]">
+      <header className="shrink-0 bg-[#f7f7f7] px-4 py-3 sm:px-6 lg:px-8">
         <div className="flex w-full items-center gap-3 sm:gap-4">
           <Link
             href="/dashboard"
