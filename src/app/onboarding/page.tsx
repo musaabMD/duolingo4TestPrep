@@ -36,66 +36,67 @@ const SCHEDULES: {
   value: StudyTime;
   title: string;
   icon: "sun" | "mug" | "moon" | "calendar";
+  tone: string;
 }[] = [
   {
     value: "morning",
     title: "Morning",
     icon: "sun",
+    tone: "bg-[#fff4d6] text-[#c98500]",
   },
   {
     value: "afternoon",
     title: "Afternoon",
     icon: "mug",
+    tone: "bg-[#ffe8d6] text-[#d46b1c]",
   },
   {
     value: "night",
     title: "At night",
     icon: "moon",
+    tone: "bg-[#ebe4ff] text-[#6b5bdb]",
   },
   {
     value: "flexible",
     title: "Flexible",
     icon: "calendar",
+    tone: "bg-[#e8f4ff] text-[#1674a8]",
   },
 ];
 
 function ScheduleIcon({
   name,
-  className = "",
 }: {
   name: (typeof SCHEDULES)[number]["icon"];
-  className?: string;
 }) {
-  const common = `h-7 w-7 ${className}`;
   if (name === "sun") {
     return (
-      <svg viewBox="0 0 24 24" className={common} fill="none" stroke="currentColor" strokeWidth="2">
+      <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2.2">
         <circle cx="12" cy="12" r="4" />
-        <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" strokeLinecap="round" />
+        <path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8l1.8-1.8M18 6l1.8-1.8" strokeLinecap="round" />
       </svg>
     );
   }
   if (name === "mug") {
     return (
-      <svg viewBox="0 0 24 24" className={common} fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M5 8h11v7a4 4 0 01-4 4H9a4 4 0 01-4-4V8z" strokeLinejoin="round" />
-        <path d="M16 10h2.5a2.5 2.5 0 010 5H16" strokeLinecap="round" />
-        <path d="M8 4c.5 1 .5 2 0 3M11 4c.5 1 .5 2 0 3" strokeLinecap="round" />
+      <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2.2">
+        <path d="M4 8h12v8a4 4 0 01-4 4H8a4 4 0 01-4-4V8z" strokeLinejoin="round" />
+        <path d="M16 10h2a2.5 2.5 0 010 5h-2" strokeLinecap="round" />
+        <path d="M8 3.5c.6 1.1.6 2.2 0 3.3M11.5 3.5c.6 1.1.6 2.2 0 3.3" strokeLinecap="round" />
       </svg>
     );
   }
   if (name === "moon") {
     return (
-      <svg viewBox="0 0 24 24" className={common} fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M20 14.5A7.5 7.5 0 019.5 4 7.5 7.5 0 0012 19a7.5 7.5 0 008-4.5z" strokeLinejoin="round" />
+      <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2.2">
+        <path d="M20 15a7.5 7.5 0 01-9.8-9.8A7.5 7.5 0 1019.9 15z" strokeLinejoin="round" />
       </svg>
     );
   }
   return (
-    <svg viewBox="0 0 24 24" className={common} fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="3" y="5" width="18" height="16" rx="2" />
+    <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2.2">
+      <rect x="3" y="5" width="18" height="16" rx="2.5" />
       <path d="M3 10h18M8 3v4M16 3v4" strokeLinecap="round" />
-      <path d="M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01M16 17h.01" strokeLinecap="round" />
     </svg>
   );
 }
@@ -319,39 +320,29 @@ function OnboardingInner() {
               </h1>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              {SCHEDULES.map((item) => {
-                const selected = state.studyTime === item.value;
-                return (
-                  <button
-                    key={item.value}
-                    type="button"
-                    onClick={() => selectAndAdvance({ studyTime: item.value })}
-                    className={`flex min-h-20 items-center justify-between gap-3 rounded-2xl border-2 px-5 py-4 text-left transition ${
-                      selected
-                        ? "border-[var(--sky)] bg-[#ddf4ff]"
-                        : "border-[var(--line)] bg-white hover:bg-[var(--surface)]"
-                    }`}
-                  >
-                    <span className="flex min-w-0 items-center gap-3">
-                      <span
-                        className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${
-                          selected
-                            ? "bg-white text-[var(--sky)]"
-                            : "bg-[var(--surface)] text-[var(--muted)]"
-                        }`}
-                      >
-                        <ScheduleIcon name={item.icon} />
-                      </span>
-                      <span className="min-w-0 text-lg font-extrabold text-[var(--ink)]">
-                        {item.title}
-                      </span>
+              {SCHEDULES.map((item) => (
+                <button
+                  key={item.value}
+                  type="button"
+                  onClick={() => selectAndAdvance({ studyTime: item.value })}
+                  className="flex min-h-20 items-center justify-between gap-3 rounded-2xl border-2 border-[var(--line)] bg-white px-5 py-4 text-left transition hover:border-[var(--sky)] hover:bg-[#f7fbff]"
+                >
+                  <span className="flex min-w-0 items-center gap-3">
+                    <span
+                      className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${item.tone}`}
+                      aria-hidden
+                    >
+                      <ScheduleIcon name={item.icon} />
                     </span>
-                    <span className="shrink-0 text-xl font-bold text-[#c4c4c4]" aria-hidden>
-                      →
+                    <span className="min-w-0 text-lg font-extrabold text-[var(--ink)]">
+                      {item.title}
                     </span>
-                  </button>
-                );
-              })}
+                  </span>
+                  <span className="shrink-0 text-xl font-bold text-[#c4c4c4]" aria-hidden>
+                    →
+                  </span>
+                </button>
+              ))}
             </div>
           </div>
         )}
