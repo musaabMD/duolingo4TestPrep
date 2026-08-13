@@ -35,31 +35,26 @@ const GOALS: { value: DailyGoal; label: string; fill: number }[] = [
 const SCHEDULES: {
   value: StudyTime;
   title: string;
-  subtitle: string;
   icon: "sun" | "mug" | "moon" | "calendar";
 }[] = [
   {
     value: "morning",
     title: "Morning",
-    subtitle: "Start the day with drills",
     icon: "sun",
   },
   {
     value: "afternoon",
-    title: "During a break",
-    subtitle: "Fit practice between tasks",
+    title: "Afternoon",
     icon: "mug",
   },
   {
     value: "night",
     title: "At night",
-    subtitle: "Wind down with a short set",
     icon: "moon",
   },
   {
     value: "flexible",
     title: "Flexible",
-    subtitle: "Whenever I have time",
     icon: "calendar",
   },
 ];
