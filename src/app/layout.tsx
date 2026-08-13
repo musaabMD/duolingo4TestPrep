@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Fraunces, Nunito } from "next/font/google";
 import "./globals.css";
 
@@ -32,7 +34,11 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       className={`${nunito.variable} ${fraunces.variable} h-full`}
     >
-      <body className="min-h-full antialiased">{children}</body>
+      <body className="min-h-full antialiased">
+        {children}
+        <Analytics />
+        <SpeedInsights />
+      </body>
     </html>
   );
 }
