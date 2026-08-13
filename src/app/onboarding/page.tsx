@@ -105,6 +105,11 @@ function OnboardingInner() {
     setStepIndex((i) => Math.min(STEPS.length - 1, i + 1));
   }
 
+  function selectAndAdvance(partial: Partial<OnboardingState>) {
+    patch(partial);
+    setStepIndex((i) => Math.min(STEPS.length - 1, i + 1));
+  }
+
   const minDateStr = new Date().toISOString().slice(0, 10);
 
   return (
