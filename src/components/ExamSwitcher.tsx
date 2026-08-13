@@ -125,7 +125,7 @@ export function ExamSwitcher() {
             </Link>
 
             <Link
-              href="/onboarding?exam="
+              href="/onboarding"
               role="menuitem"
               onClick={() => setOpen(false)}
               className="flex w-full items-center gap-3 rounded-2xl p-3 text-left text-[var(--ink)] transition hover:bg-[var(--surface)]"
