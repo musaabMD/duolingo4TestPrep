@@ -65,6 +65,7 @@ function PracticeInner() {
   const [showReport, setShowReport] = useState(false);
   const [reportReason, setReportReason] = useState("Incorrect information");
   const [reportNote, setReportNote] = useState("");
+  const [reportFiles, setReportFiles] = useState<File[]>([]);
   const [reportSubmitted, setReportSubmitted] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [done, setDone] = useState(false);
@@ -145,6 +146,7 @@ function PracticeInner() {
 
   function openReport() {
     setReportSubmitted(false);
+    setReportFiles([]);
     setShowReport(true);
   }
 
@@ -155,6 +157,7 @@ function PracticeInner() {
       examId: question.examId,
       reason: reportReason,
       note: reportNote.trim(),
+      attachments: reportFiles.map((file) => file.name),
       reportedAt: new Date().toISOString(),
     });
     if (savedRecord && !savedRecord.flagged) toggleReviewFlag(question.id);
@@ -198,19 +201,25 @@ function PracticeInner() {
     const incorrectCount = questions.length - correctCount;
     const scorePercent = Math.round((correctCount / questions.length) * 100);
     const timeLabel = `${Math.floor(elapsedSeconds / 60)}:${String(elapsedSeconds % 60).padStart(2, "0")}`;
+    const averageSeconds = Math.max(1, Math.round(elapsedSeconds / questions.length));
     return (
-      <div className="flex min-h-dvh w-full flex-col bg-[#f4f6f8]">
+      <div className="flex min-h-dvh w-full flex-col bg-[#f5f7fa]">
         <SiteHeader compact actions={<Link href="/dashboard" className="rounded-xl bg-[var(--ink)] px-4 py-2.5 text-sm font-black text-white">Dashboard</Link>}/>
-        <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center px-5 py-12 sm:px-8">
-          <section className="rounded-[2rem] border-2 border-[var(--line)] bg-white p-6 shadow-sm sm:p-10">
-            <div className="flex flex-col gap-4 border-b border-[var(--line)] pb-7 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-sm font-black uppercase tracking-[0.18em] text-[var(--muted)]">Session report</p><h1 className="mt-2 text-4xl font-black tracking-tight text-[var(--ink)] sm:text-5xl">Practice results</h1></div><div className="rounded-2xl bg-[var(--surface)] px-5 py-3 text-right"><p className="text-xs font-black uppercase text-[var(--muted)]">Score</p><p className="text-4xl font-black">{scorePercent}%</p></div></div>
-            <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-2xl border-2 border-[var(--line)] p-5"><p className="text-xs font-black uppercase text-[var(--muted)]">Correct</p><p className="mt-2 text-4xl font-black text-[#147657]">{correctCount}</p></div>
-              <div className="rounded-2xl border-2 border-[var(--line)] p-5"><p className="text-xs font-black uppercase text-[var(--muted)]">Incorrect</p><p className="mt-2 text-4xl font-black text-[#b83b42]">{incorrectCount}</p></div>
-              <div className="rounded-2xl border-2 border-[var(--line)] p-5"><p className="text-xs font-black uppercase text-[var(--muted)]">Time</p><p className="mt-2 text-4xl font-black">{timeLabel}</p></div>
-              <div className="rounded-2xl border-2 border-[var(--line)] p-5"><p className="text-xs font-black uppercase text-[var(--muted)]">Questions</p><p className="mt-2 text-4xl font-black">{questions.length}</p></div>
+        <main className="mx-auto w-full max-w-7xl flex-1 px-5 py-10 sm:px-8 lg:px-12">
+          <section className="overflow-hidden rounded-[2rem] border-2 border-[var(--line)] bg-white shadow-[0_18px_55px_rgba(21,32,50,0.07)]">
+            <div className="grid gap-8 bg-[var(--ink)] p-7 text-white sm:p-10 lg:grid-cols-[1fr_auto] lg:items-center"><div><p className="text-sm font-black uppercase tracking-[0.2em] text-white/60">Session report</p><h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">Practice results</h1><p className="mt-3 max-w-2xl font-semibold text-white/70">A complete breakdown of this session, including accuracy, pace, and every response.</p></div><div className="grid h-36 w-36 place-items-center rounded-full p-3" style={{ background: `conic-gradient(#42c892 ${scorePercent}%, #35404f 0)` }}><div className="grid h-full w-full place-items-center rounded-full bg-[var(--ink)] text-center"><div><p className="text-4xl font-black">{scorePercent}%</p><p className="text-xs font-black uppercase tracking-wide text-white/55">Accuracy</p></div></div></div></div>
+            <div className="p-6 sm:p-9">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-2xl bg-[#eaf7f2] p-5"><p className="text-xs font-black uppercase text-[#50796a]">Correct</p><p className="mt-2 text-4xl font-black text-[#147657]">{correctCount}</p></div>
+                <div className="rounded-2xl bg-[#fff0f1] p-5"><p className="text-xs font-black uppercase text-[#98656a]">Incorrect</p><p className="mt-2 text-4xl font-black text-[#b83b42]">{incorrectCount}</p></div>
+                <div className="rounded-2xl bg-[var(--surface)] p-5"><p className="text-xs font-black uppercase text-[var(--muted)]">Total time</p><p className="mt-2 text-4xl font-black">{timeLabel}</p></div>
+                <div className="rounded-2xl bg-[var(--surface)] p-5"><p className="text-xs font-black uppercase text-[var(--muted)]">Avg. pace</p><p className="mt-2 text-4xl font-black">{averageSeconds}s</p></div>
+              </div>
+              <div className="mt-8 grid gap-8 lg:grid-cols-[1.25fr_.75fr]">
+                <section><div className="flex items-center justify-between"><h2 className="text-2xl font-black">Question analysis</h2><span className="text-sm font-bold text-[var(--muted)]">{questions.length} questions</span></div><div className="mt-4 overflow-hidden rounded-2xl border-2 border-[var(--line)]">{questions.map((item, questionIndex) => { const response = answers[questionIndex]; const correct = response === item.correctIndex; return <div key={item.id} className="grid grid-cols-[2.5rem_1fr_auto] items-center gap-3 border-b border-[var(--line)] px-4 py-4 last:border-b-0"><span className={`grid h-9 w-9 place-items-center rounded-xl font-black ${correct ? "bg-[#e2f5ec] text-[#16865f]" : "bg-[#fde9ea] text-[#c83c43]"}`}>{questionIndex + 1}</span><div className="min-w-0"><p className="text-xs font-black uppercase tracking-wide text-[var(--muted)]">{item.topic}</p><p className="truncate font-bold">{item.prompt}</p></div><span className={`rounded-xl px-3 py-1.5 text-xs font-black ${correct ? "bg-[#e2f5ec] text-[#16865f]" : "bg-[#fde9ea] text-[#c83c43]"}`}>{correct ? "Correct" : "Incorrect"}</span></div>; })}</div></section>
+                <aside className="rounded-3xl bg-[var(--surface)] p-6"><p className="text-xs font-black uppercase tracking-[0.15em] text-[var(--muted)]">Session summary</p><h2 className="mt-2 text-2xl font-black">Next recommendation</h2><p className="mt-3 font-semibold leading-relaxed text-[var(--muted)]">{incorrectCount ? `Review the ${incorrectCount} missed ${incorrectCount === 1 ? "question" : "questions"} before starting another set. Focus on the explanations and retry without looking at the answer.` : "Your answers were fully accurate. Continue with a new set to test consistency across more topics."}</p><div className="mt-6 space-y-3 border-t border-[var(--line)] pt-5"><div className="flex justify-between gap-4 font-bold"><span className="text-[var(--muted)]">Study streak</span><span>{streak} days</span></div><div className="flex justify-between gap-4 font-bold"><span className="text-[var(--muted)]">Study points</span><span>+{earnedXp}</span></div><div className="flex justify-between gap-4 font-bold"><span className="text-[var(--muted)]">Questions</span><span>{questions.length}</span></div></div></aside>
+              </div>
             </div>
-            <div className="mt-7 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[var(--surface)] px-5 py-4"><p className="font-bold text-[var(--muted)]">{streak}-day study streak</p><p className="text-sm font-black text-[var(--muted)]">+{earnedXp} study points</p></div>
           </section>
         </main>
         <footer className="border-t border-[var(--line)] bg-white px-5 py-5">
@@ -521,6 +530,7 @@ function PracticeInner() {
                 {REPORT_REASONS.map((reason) => <button key={reason} type="button" onClick={() => setReportReason(reason)} className={`min-h-12 rounded-xl border-2 px-4 text-left text-sm font-black transition ${reportReason === reason ? "border-[#d69a21] bg-[#fff7e1] text-[#855600]" : "border-[var(--line)] bg-white text-[var(--ink)] hover:border-[#c5cbd1]"}`}>{reason}</button>)}
               </div>
               <label className="mt-5 block"><span className="text-sm font-black text-[var(--ink)]">More detail <span className="font-semibold text-[var(--muted)]">(optional)</span></span><textarea value={reportNote} onChange={(event) => setReportNote(event.target.value)} rows={3} placeholder="Tell us what seems wrong…" className="mt-2 w-full resize-none rounded-2xl border-2 border-[var(--line)] bg-[var(--surface)] p-4 font-semibold outline-none transition focus:border-[#d69a21]"/></label>
+              <div className="mt-5"><div className="flex items-end justify-between gap-3"><div><p className="text-sm font-black text-[var(--ink)]">Screenshots <span className="font-semibold text-[var(--muted)]">(optional)</span></p><p className="mt-1 text-xs font-bold text-[var(--muted)]">PNG, JPG, or WEBP · up to 3 images</p></div><span className="text-xs font-black text-[var(--muted)]">{reportFiles.length}/3</span></div><label className="mt-2 flex min-h-20 cursor-pointer items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-[#c7cdd4] bg-[var(--surface)] px-4 text-sm font-black text-[var(--ink)] transition hover:border-[#d69a21] hover:bg-[#fffaf0]"><svg viewBox="0 0 24 24" className="h-6 w-6 text-[#a66c00]" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 16V4m0 0L8 8m4-4 4 4M5 14v5h14v-5" strokeLinecap="round" strokeLinejoin="round"/></svg><span>Add screenshots</span><input type="file" accept="image/png,image/jpeg,image/webp" multiple className="sr-only" onChange={(event) => { const next = Array.from(event.target.files ?? []).filter((file) => file.type.startsWith("image/")).slice(0, Math.max(0, 3 - reportFiles.length)); setReportFiles((current) => [...current, ...next].slice(0, 3)); event.target.value = ""; }}/></label>{reportFiles.length ? <div className="mt-2 space-y-2">{reportFiles.map((file, fileIndex) => <div key={`${file.name}-${file.lastModified}`} className="flex items-center gap-3 rounded-xl border border-[var(--line)] bg-white px-3 py-2"><span className="grid h-9 w-9 place-items-center rounded-lg bg-[#e9f5ff] text-[#168ac1]"><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m4 17 5-4 4 3 3-2 4 3"/></svg></span><span className="min-w-0 flex-1 truncate text-sm font-bold">{file.name}</span><button type="button" onClick={() => setReportFiles((current) => current.filter((_, index) => index !== fileIndex))} aria-label={`Remove ${file.name}`} className="grid h-8 w-8 place-items-center rounded-lg text-[var(--muted)] hover:bg-[#fff0f0] hover:text-[#c83c43]">✕</button></div>)}</div> : null}</div>
               <button type="button" onClick={submitReport} className="mt-5 min-h-14 w-full rounded-2xl bg-[var(--ink)] text-lg font-black text-white shadow-[0_4px_0_#111]">Submit report</button>
             </>}
           </section>

@@ -9,7 +9,7 @@ const RANK_SEEDS: Record<string, { rank: number; names: [string, string] }> = {
   gre: { rank: 16, names: ["Maya K", "Evan D"] }, lsat: { rank: 9, names: ["Nora J", "Adam V"] },
 };
 
-export function ExamRankCard({ exam, score, studyMinutes, activeDays }: { exam: ExamOption; score: number; studyMinutes: number; activeDays: number }) {
+export function ExamRankCard({ exam, score, studyMinutes, activeDays, compact = false }: { exam: ExamOption; score: number; studyMinutes: number; activeDays: number; compact?: boolean }) {
   const [metric, setMetric] = useState<"score" | "streak" | "study">("score");
   const seed = RANK_SEEDS[exam.id];
   const userScore = Math.max(0, Math.min(100, score));
@@ -22,7 +22,7 @@ export function ExamRankCard({ exam, score, studyMinutes, activeDays }: { exam: 
   ];
 
   return (
-    <aside className="rounded-[1.5rem] border-2 border-[var(--line)] bg-white p-5" aria-label={`${exam.name} rank`}>
+    <aside className={compact ? "bg-white" : "rounded-[1.5rem] border-2 border-[var(--line)] bg-white p-5"} aria-label={`${exam.name} rank`}>
       <div className="flex items-center justify-between gap-4"><p className="text-lg font-black text-[var(--ink)]">{exam.name} ranking</p><span className="rounded-xl bg-[#fff4d6] px-3 py-1 text-xs font-black text-[#a86700]">#{seed.rank}</span></div>
       <div className="mt-4 grid grid-cols-3 gap-1 rounded-2xl bg-[var(--surface)] p-1" aria-label="Ranking metric">{(["score", "streak", "study"] as const).map((item) => <button key={item} type="button" onClick={() => setMetric(item)} className={`rounded-xl px-2 py-2 text-xs font-black capitalize transition ${metric === item ? "bg-white text-[var(--ink)] shadow-sm" : "text-[var(--muted)] hover:text-[var(--ink)]"}`}>{item}</button>)}</div>
       <div className="mt-4 space-y-1.5">

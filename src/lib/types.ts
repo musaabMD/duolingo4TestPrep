@@ -39,6 +39,7 @@ export type QuestionReport = {
   examId: ExamId;
   reason: string;
   note: string;
+  attachments?: string[];
   reportedAt: string;
 };
 

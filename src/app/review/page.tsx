@@ -26,6 +26,20 @@ function FlagButton({ record }: { record: ReviewRecord }) {
   );
 }
 
+function ReviewExamSwitcher({ plans, examId, onSelect }: { plans: ReturnType<typeof useExamPlans>; examId: ExamId; onSelect: (id: ExamId) => void }) {
+  const [open, setOpen] = useState(false);
+  const activeExam = getExam(examId);
+  if (!activeExam || plans.length < 2) return null;
+  return <div className="relative">
+    <button type="button" onClick={() => setOpen((value) => !value)} aria-haspopup="menu" aria-expanded={open} className="inline-flex min-h-12 items-center gap-3 rounded-2xl border-2 border-[var(--line)] bg-white px-3 pr-4 font-black shadow-sm transition hover:border-[#bec5cc]">
+      <span className="grid h-8 w-8 place-items-center rounded-xl bg-[var(--ink)] text-[10px] text-white">{activeExam.name.slice(0, 2)}</span>
+      <span>{activeExam.name}</span>
+      <svg viewBox="0 0 24 24" className={`h-4 w-4 text-[var(--muted)] transition ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m7 9 5 5 5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+    </button>
+    {open ? <><button type="button" aria-label="Close exam menu" onClick={() => setOpen(false)} className="fixed inset-0 z-30 cursor-default"/><div role="menu" className="absolute right-0 top-14 z-40 w-64 rounded-3xl border-2 border-[var(--line)] bg-white p-2 shadow-[0_20px_55px_rgba(21,32,50,0.16)]">{plans.map((plan) => { const item = getExam(plan.examId); return item ? <button key={item.id} role="menuitem" type="button" onClick={() => { onSelect(item.id); setOpen(false); }} className={`flex w-full items-center gap-3 rounded-2xl p-3 text-left font-black transition ${item.id === examId ? "bg-[#e9f5ff] text-[#1674a8]" : "hover:bg-[var(--surface)]"}`}><span className="grid h-9 w-9 place-items-center rounded-xl bg-[var(--ink)] text-[10px] text-white">{item.name.slice(0, 2)}</span><span className="flex-1">{item.name}</span>{item.id === examId ? <span aria-hidden>✓</span> : null}</button> : null; })}</div></> : null}
+  </div>;
+}
+
 function ReviewDetail({ records, activeRecord, examId, filter }: { records: ReviewRecord[]; activeRecord: ReviewRecord; examId: ExamId; filter: Filter }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const question = QUESTIONS.find((item) => item.id === activeRecord.questionId);
@@ -37,29 +51,28 @@ function ReviewDetail({ records, activeRecord, examId, filter }: { records: Revi
   const detailHref = (record: ReviewRecord) => `/review?exam=${examId}&filter=${filter}&question=${record.questionId}`;
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-[#f4f6f8]">
-      <header className="shrink-0 border-b border-[#263a49] bg-[#173142] px-5 py-4 text-white">
+    <div className="flex h-dvh flex-col overflow-hidden bg-[#f5f7fa]">
+      <header className="shrink-0 border-b border-[var(--line)] bg-white px-4 py-3 sm:px-6">
         <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2"><button type="button" onClick={() => setSidebarOpen((value) => !value)} aria-label={sidebarOpen ? "Close question list" : "Open question list"} aria-pressed={sidebarOpen} className="grid h-9 w-9 place-items-center rounded-lg bg-white/10 text-[#ffd16a] hover:bg-white/15"><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round"/></svg></button><Link href={backHref} className="inline-flex items-center gap-2 font-extrabold text-[#ffd16a]">← Back to review</Link></div>
-          <p className="hidden font-bold capitalize sm:block">{filter === "all" ? "All answered" : filter}</p>
-          <p className="font-extrabold">{index + 1} / {records.length}</p>
+          <div className="flex min-w-0 items-center gap-2"><Link href={backHref} aria-label="Back to review" className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border-2 border-[var(--line)] bg-white text-[var(--ink)] transition hover:bg-[var(--surface)]"><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m15 5-7 7 7 7" strokeLinecap="round" strokeLinejoin="round"/></svg></Link><button type="button" onClick={() => setSidebarOpen((value) => !value)} aria-label={sidebarOpen ? "Hide question list" : "Show question list"} aria-pressed={sidebarOpen} className={`inline-flex h-10 items-center gap-2 rounded-xl border-2 px-3 text-sm font-black transition ${sidebarOpen ? "border-[var(--ink)] bg-[var(--ink)] text-white" : "border-[var(--line)] bg-white text-[var(--ink)]"}`}><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round"/></svg><span className="hidden sm:inline">Questions</span></button><p className="truncate text-sm font-black capitalize text-[var(--muted)]">{filter === "all" ? "All answered" : filter}</p></div>
+          <p className="rounded-xl bg-[var(--surface)] px-3 py-2 text-sm font-black tabular-nums text-[var(--ink)]">{index + 1} / {records.length}</p>
         </div>
       </header>
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        <aside className={`flex shrink-0 flex-col overflow-hidden bg-[#102531] text-white transition-[width] duration-200 ${sidebarOpen ? "w-[270px]" : "w-16"}`}>
-          <div className="flex h-14 shrink-0 items-center justify-between border-b border-white/10 px-4"><p className={`font-extrabold ${sidebarOpen ? "block" : "hidden"}`}>Questions</p><button type="button" onClick={() => setSidebarOpen((value) => !value)} aria-label={sidebarOpen ? "Close question list" : "Open question list"} className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-[#ffd16a] hover:bg-white/10"><svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2"><path d={sidebarOpen ? "m15 5-7 7 7 7" : "m9 5 7 7-7 7"} strokeLinecap="round" strokeLinejoin="round"/></svg></button></div>
-          <div className="max-h-[calc(100dvh-150px)] overflow-y-auto">
+        <aside className={`shrink-0 overflow-hidden border-r border-[var(--line)] bg-white transition-[width,opacity] duration-200 ${sidebarOpen ? "w-[300px] opacity-100" : "w-0 opacity-0"}`} aria-hidden={!sidebarOpen}>
+          <div className="flex h-16 items-center justify-between px-5"><div><p className="font-black text-[var(--ink)]">Question navigator</p><p className="text-xs font-bold text-[var(--muted)]">{records.length} in this set</p></div><button type="button" onClick={() => setSidebarOpen(false)} aria-label="Hide question list" className="grid h-9 w-9 place-items-center rounded-xl bg-[var(--surface)] text-[var(--muted)]">✕</button></div>
+          <div className="max-h-[calc(100dvh-125px)] space-y-2 overflow-y-auto px-3 pb-4">
             {records.map((record) => {
               const item = QUESTIONS.find((candidate) => candidate.id === record.questionId);
-              return item ? <Link key={record.questionId} href={detailHref(record)} aria-label={item.prompt} className={`block border-b border-white/10 p-4 text-sm font-semibold leading-snug transition ${record.questionId === activeRecord.questionId ? "bg-[#536b79]" : "text-white/75 hover:bg-white/10"}`}>{sidebarOpen ? item.prompt : <span className="grid h-8 w-8 place-items-center rounded-lg bg-white/10">{records.indexOf(record) + 1}</span>}</Link> : null;
+              return item ? <Link key={record.questionId} href={detailHref(record)} aria-label={item.prompt} className={`block rounded-2xl border-2 p-4 text-sm font-bold leading-snug transition ${record.questionId === activeRecord.questionId ? "border-[#79bfe7] bg-[#eaf6fd] text-[var(--ink)]" : "border-transparent bg-[var(--surface)] text-[var(--muted)] hover:border-[var(--line)] hover:text-[var(--ink)]"}`}><div className="mb-2 flex items-center justify-between gap-2"><span className="text-xs font-black uppercase tracking-wide">{item.topic}</span><span className={`h-2.5 w-2.5 rounded-full ${record.correct ? "bg-[#23966f]" : "bg-[#d9565b]"}`}/></div><span className="line-clamp-4">{item.prompt}</span></Link> : null;
             })}
           </div>
         </aside>
 
-        <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-white">
+        <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-[#f7f8fa]">
           <div className="grid min-h-0 flex-1 overflow-y-auto xl:grid-cols-[1.05fr_.95fr]">
-            <section className="p-6 sm:p-10 xl:p-14">
+            <section className="bg-white p-6 sm:p-10 xl:p-14">
               <div className="flex items-start justify-between gap-4"><p className="text-sm font-bold text-[var(--muted)]">{question.topic}</p><FlagButton record={activeRecord} /></div>
               <h1 className="mt-3 text-2xl font-black leading-snug text-[var(--ink)] sm:text-3xl">{question.prompt}</h1>
               <div className="mt-8 space-y-3">
@@ -126,10 +139,10 @@ function ReviewInner() {
     <div className="min-h-dvh bg-[#f5f7fa]">
       <SiteHeader compact />
       <main className="mx-auto w-full max-w-6xl px-5 pb-20 pt-8 sm:px-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><Link href="/dashboard" className="text-sm font-extrabold text-[var(--brand-deep)]">← Dashboard</Link><h1 className="mt-2 text-4xl font-black tracking-tight text-[var(--ink)] sm:text-5xl">Review Questions</h1><p className="mt-2 font-semibold text-[var(--muted)]">See what you know, revisit mistakes, and flag anything for later.</p></div>{plans.length > 1 && <select value={examId} onChange={(event) => setParam("exam", event.target.value)} className="min-h-12 rounded-2xl border-2 border-[var(--line)] bg-white px-4 font-extrabold outline-none focus:border-[var(--brand)]">{plans.map((plan) => { const item = getExam(plan.examId); return item ? <option key={item.id} value={item.id}>{item.name}</option> : null; })}</select>}</div>
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-center gap-4"><Link href="/dashboard" aria-label="Back to dashboard" className="grid h-12 w-12 place-items-center rounded-2xl border-2 border-[var(--line)] bg-white text-[var(--ink)] shadow-sm transition hover:bg-[var(--surface)]"><svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m15 5-7 7 7 7" strokeLinecap="round" strokeLinejoin="round"/></svg></Link><h1 className="text-4xl font-black tracking-tight text-[var(--ink)] sm:text-5xl">Review</h1></div><ReviewExamSwitcher plans={plans} examId={examId} onSelect={(id) => setParam("exam", id)}/></div>
 
-        <div className="mt-8 flex gap-2 overflow-x-auto border-b border-[var(--line)]">
-          {(["all", "flagged", "incorrect", "correct"] as Filter[]).map((item) => <button key={item} type="button" onClick={() => setParam("filter", item)} className={`min-w-28 border-b-4 px-4 pb-4 pt-2 text-center capitalize transition ${filter === item ? "border-[var(--ink)] text-[var(--ink)]" : "border-transparent text-[var(--muted)]"}`}><span className="block text-sm font-extrabold">{item}</span><span className="mt-1 block text-3xl font-black">{counts[item]}</span></button>)}
+        <div className="mx-auto mt-8 flex w-fit max-w-full gap-1 overflow-x-auto rounded-2xl bg-[#e9edf1] p-1.5">
+          {(["all", "flagged", "incorrect", "correct"] as Filter[]).map((item) => <button key={item} type="button" onClick={() => setParam("filter", item)} className={`inline-flex min-h-11 items-center gap-2 rounded-xl px-4 text-sm font-black capitalize transition ${filter === item ? "bg-white text-[var(--ink)] shadow-sm" : "text-[var(--muted)] hover:text-[var(--ink)]"}`}><span>{item}</span><span className={`grid min-w-6 place-items-center rounded-lg px-1.5 py-0.5 text-xs ${filter === item ? "bg-[var(--ink)] text-white" : "bg-white/70"}`}>{counts[item]}</span></button>)}
         </div>
 
         <div className="mt-7 grid gap-3 sm:grid-cols-[1fr_auto]"><label className="relative"><span className="sr-only">Search answered questions</span><svg viewBox="0 0 24 24" className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--muted)]" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search answered questions" className="min-h-14 w-full rounded-xl border-2 border-[var(--line)] bg-white pl-12 pr-4 font-semibold outline-none focus:border-[var(--brand)]" /></label><select aria-label="Filter by subject" value={subject} onChange={(event) => setParam("subject", event.target.value)} className="min-h-14 rounded-xl border-2 border-[var(--line)] bg-white px-4 font-extrabold text-[var(--brand-deep)] outline-none"><option value="all">All subjects</option>{topics.map((topic) => <option key={topic} value={topic}>{topic}</option>)}</select></div>
